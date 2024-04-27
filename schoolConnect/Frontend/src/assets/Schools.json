@@ -1,0 +1,65 @@
+[
+    {
+        "logo": "British.png",
+        "name": "Bright Future Academy",
+        "need": "In need of 4 teachers for Chemistry, Mathematics, Biology, and Geography, one teacher each.",
+        "location": "Dar es Salaam, Tanzania",
+        "duration": "6 months"
+    },
+    {
+        "logo": "Chamazi.jpg",
+        "name": "Hopeful High School",
+        "need": "In need of 3 teachers for English, Physics, and History, one teacher each.",
+        "location": "Arusha, Tanzania",
+        "duration": "4 months"
+    },
+    {
+        "logo": "Mbande.jpg",
+        "name": "Success Secondary School",
+        "need": "In need of 5 teachers for Mathematics, Physics, Chemistry, Biology, and English, one teacher each.",
+        "location": "Dodoma, Tanzania",
+        "duration": "2 months"
+    },
+    {
+        "logo": "Same.jpg",
+        "name": "Future Leaders Academy",
+        "need": "In need of 2 teachers for Mathematics and Physics, one teacher each.",
+        "location": "Mwanza, Tanzania",
+        "duration": "1 months"
+    },
+    {
+        "logo": "Same.jpg",
+        "name": "Dream High School",
+        "need": "In need of 3 teachers for Biology, Chemistry, and Geography, one teacher each.",
+        "location": "Mbeya, Tanzania",
+        "duration": "3 months"
+    },
+    {
+        "logo": "Chamazi.jpg",
+        "name": "Golden Gate College",
+        "need": "In need of 4 teachers for Physics, Mathematics, History, and English, one teacher each.",
+        "location": "Moshi, Tanzania",
+        "duration": "4 months"
+    },
+    {
+        "logo": "Same.jpg",
+        "name": "Future Stars Secondary School",
+        "need": "In need of 2 teachers for Biology and Chemistry, one teacher each.",
+        "location": "Tanga, Tanzania",
+        "duration": "2 months"
+    },
+    {
+        "logo": "Mbande.jpg",
+        "name": "Excellence Academy",
+        "need": "In need of 3 teachers for Physics, Mathematics, and Geography, one teacher each.",
+        "location": "Iringa, Tanzania",
+        "duration": "12 months"
+    },
+    {
+        "logo": "British.png",
+        "name": "Harmony High School",
+        "need": "In need of 4 teachers for English, Biology, Chemistry, and History, one teacher each.",
+        "location": "Morogoro, Tanzania",
+        "duration": "2 months"
+    }
+]
