@@ -1,22 +1,12 @@
 import React from 'react'
 import Cards from '../Components/Cards';
-<<<<<<< Updated upstream
-import { Badge, Typography } from '@mui/material';
-=======
 import { Badge, Container, Typography } from '@mui/material';
 import { Navigate } from 'react-router-dom';
 import NavigationBar from '../Components/NavigationBar';
->>>>>>> Stashed changes
 
 
 const Home = ({user}) => {
   const newApplicationsCount = "new"
-<<<<<<< Updated upstream
-
-  return (
-    <React.Fragment>
-      <Typography sx={{ marginTop: '10%', marginLeft: '7%', color: '#A0826A' }}>
-=======
   const date = new Date();
   
  
@@ -28,12 +18,27 @@ const Home = ({user}) => {
     <NavigationBar />
     <Container>
     <Typography sx={{ marginTop: '10%', marginLeft: '7%', color: '#A0826A' }}>
->>>>>>> Stashed changes
         Suggested for You
         <Badge badgeContent={newApplicationsCount} color="primary" sx={{ position:'absolute', marginLeft: '0.5rem' }} />
       </Typography>
 
       <Cards />
+    </Container>
+    <Container >
+    <Typography sx={{ marginTop: '5%', marginLeft: '7%', color: '#A0826A' }}>
+        All
+        {/* <Badge badgeContent={newApplicationsCount} color="primary" sx={{ position:'absolute', marginLeft: '0.5rem' }} /> */}
+      </Typography>
+
+      <Cards />
+    </Container>
+      <footer style={{backgroundColor: '#0E424C', marginTop: '5%'}}>
+        <Container>
+          <Typography variant="h6" style={{color: 'white', textAlign: 'center', padding: '1rem'}}>
+            School<span style={{color:'#A0826A'}}>Connect</span> &copy; {date.getFullYear()}
+          </Typography>
+        </Container>
+      </footer>
     </React.Fragment >
   )
 }

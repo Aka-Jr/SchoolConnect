@@ -43,13 +43,9 @@ const App = () => {
           <Route path="/Home" element={<Home user={user} />} />
           <Route path="/" element={<Home user={user} />} />
           <Route path="/AboutUs" element={<AboutUs />} />
-<<<<<<< Updated upstream
-          <Route path="/ContactUS" element={<ContactUs />} />
-=======
           <Route path="/ContactUs" element={<ContactUs />} />
           <Route path="/sadmin" element={<ProtectedRoutes user={user} ><AdminsDashboard /></ProtectedRoutes>} />
           <Route path="/user" element={<ProtectedRoutes user={user} ><VolunteersDashboard /></ProtectedRoutes>} />
->>>>>>> Stashed changes
         </Routes>
       </div>
     </BrowserRouter>
