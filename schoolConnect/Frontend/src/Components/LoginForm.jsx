@@ -6,19 +6,24 @@ import { signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail } f
 import { Input, Typography, IconButton, Box, Button, Divider } from '@mui/material';
 import LocalLibraryIcon from '@mui/icons-material/LocalLibrary';
 import GoogleIcon from '@mui/icons-material/Google';
+import { useNavigate } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 
-const LoginForm = ({handleClose}) => {
+const LoginForm = ({ handleClose }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Perform form validation
@@ -46,19 +51,30 @@ const LoginForm = ({handleClose}) => {
       return;
     }
 
-    // Authenticate user with email and password
-    signInWithEmailAndPassword(auth, formData.email, formData.password)
-      .then(() => {
-        // Login successful
-        toast.success('Login successful!');
-        handleClose();
-        // Redirect to dashboard or any other page
-      })
-      .catch((error) => {
-        // Handle login errors
-        console.error('Login error:', error);
-        toast.error('Failed to login. Please try again later.');
-      });
+    try {
+      // Authenticate user with email and password
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+
+      // Fetch additional user data from Firestore
+      const userId = userCredential.user.uid;
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      const userData = userDoc.data();
+
+      // Redirect based on userType
+      if (userData.userType === 'volunteer') {
+        navigate('/user');
+      } else if (userData.userType === 'school') {
+        navigate('/sadmin');
+      }
+      
+      // Login successful
+      toast.success('Login successful!');
+      handleClose();
+    } catch (error) {
+      // Handle login errors
+      console.error('Login error:', error);
+      toast.error('Failed to login. Please try again later.');
+    }
   };
 
   const signInWithGoogle = async () => {

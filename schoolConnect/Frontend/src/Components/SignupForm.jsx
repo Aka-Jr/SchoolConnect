@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from '../firebaseConfig';
+import { db } from '../firebaseConfig';
+import { addDoc, collection as addCollection } from "firebase/firestore";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Button, Input, Typography, Box, FormControl, MenuItem, Select } from '@mui/material';
 import LocalLibraryIcon from '@mui/icons-material/LocalLibrary';
 
 const SignupForm = ({ handleSwitchForm }) => {
-  const auth = getAuth();
   const [formData, setFormData] = useState({
     firstname: '',
     surname: '',
@@ -14,45 +16,40 @@ const SignupForm = ({ handleSwitchForm }) => {
     password: '',
     confirmPassword: '',
     userType: 'volunteer', // Default user type
-    schoolName: '', // Additional field for school registration
+    schoolName: '',
+    registrationNumber: '',
+    phoneNumber: '',
+    location: ''
+    // Additional field for school registration
   });
 
-  const handleChange = (e, field) => { // Accept an additional parameter 'field'
-    const { value } = e.target;
-    if (field === 'userType') { // Check if the field is 'registrationType'
-      // If changing the registration type, reset relevant fields
-      setFormData({
-        ...formData,
-        [field]: value,
-        firstname: '',
-        surname: '',
-        schoolName: '', // Reset schoolName field
-      });
-    } else {
-      // Otherwise, update the form data normally
-      setFormData({ ...formData, [field]: value });
-    }
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { firstname, surname, email, password, confirmPassword, userType, schoolName } = formData;
+    const { firstname, surname, email, password, confirmPassword, userType, schoolName, registrationNumber, phoneNumber, location } = formData;
 
     // Form validation
     const validationErrors = {};
 
-    if (!firstname && userType === 'volunteer') {
-      validationErrors.firstname = 'First name is required.';
-    }
-
-    if (!surname && userType === 'volunteer') {
-      validationErrors.surname = 'Surname is required.';
-    }
-
     if (!schoolName && userType === 'school') {
       validationErrors.schoolName = 'School name is required.';
+    }
+
+    if (!registrationNumber && userType === 'school') {
+      validationErrors.registrationNumber = 'Registration number is required.';
+    }
+
+    if (!phoneNumber && userType === 'school') {
+      validationErrors.phoneNumber = 'Phone number is required.';
+    }
+
+    if (!location && userType === 'school') {
+      validationErrors.location = 'Location is required.';
     }
 
     if (!email) {
@@ -82,7 +79,29 @@ const SignupForm = ({ handleSwitchForm }) => {
     }
 
     try {
+      // Create user account with email and password
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+      // Get the Firebase user ID
+      const userId = userCredential.user.uid;
+
+      // Define the data object to be stored in Firestore
+      let userData = {
+        email,
+        userType
+      };
+
+      // Add the user data to the appropriate collection in Firestore based on userType
+      if (userType === 'volunteer') {
+        // Add to 'volunteers' collection
+        userData = { ...userData, firstname, surname };
+        await addDoc(addCollection(db, "volunteers"), userData);
+      } else if (userType === 'school') {
+        // Add to 'schools' collection
+        userData = { ...userData, schoolName, registrationNumber, phoneNumber, location };
+        await addDoc(addCollection(db, "schools"), userData);
+      }
+
       // Clear form inputs
       setFormData({
         firstname: '',
@@ -91,7 +110,11 @@ const SignupForm = ({ handleSwitchForm }) => {
         password: '',
         confirmPassword: '',
         userType: 'volunteer', // Reset user type to default
-        schoolName: '', // Reset school name
+        schoolName: '',
+        registrationNumber: '',
+        phoneNumber: '',
+        location: ''
+        // Reset school name
       });
 
       // Show success message
@@ -132,15 +155,51 @@ const SignupForm = ({ handleSwitchForm }) => {
         <FormControl fullWidth sx={{ marginBottom: '16px' }}>
           <Select
             value={formData.userType}
-            onChange={(e) => handleChange(e, 'userType')} // Pass 'userType' as the second argument
-            id="userType" // Set the id to "userType"
+            onChange={(e) => setFormData({ ...formData, userType: e.target.value })}
+            id="userType"
             displayEmpty
           >
             <MenuItem value="volunteer">Volunteer</MenuItem>
             <MenuItem value="school">School</MenuItem>
           </Select>
-
         </FormControl>
+        {formData.userType === 'school' && (
+          <>
+            {/* School fields */}
+            <Input
+              type='text'
+              id='schoolName'
+              placeholder="School Name"
+              sx={{ width: '100%' }}
+              value={formData.schoolName}
+              onChange={handleChange}
+            />
+            <Input
+              type='text'
+              id='registrationNumber'
+              placeholder="Registration Number"
+              sx={{ width: '100%', mt: 2 }}
+              value={formData.registrationNumber}
+              onChange={handleChange}
+            />
+            <Input
+              type='text'
+              id='phoneNumber'
+              placeholder="Phone Number"
+              sx={{ width: '100%', mt: 2 }}
+              value={formData.phoneNumber}
+              onChange={handleChange}
+            />
+            <Input
+              type='text'
+              id='location'
+              placeholder="Location"
+              sx={{ width: '100%', mt: 2 }}
+              value={formData.location}
+              onChange={handleChange}
+            />
+          </>
+        )}
         {formData.userType === 'volunteer' && (
           <>
             {/* Volunteer fields */}
@@ -160,20 +219,6 @@ const SignupForm = ({ handleSwitchForm }) => {
               value={formData.surname}
               onChange={handleChange}
             />
-          </>
-        )}
-        {formData.userType === 'school' && (
-          <>
-            {/* School fields */}
-            <Input
-              type='text'
-              id='schoolName'
-              placeholder="School Name"
-              sx={{ width: '100%' }}
-              value={formData.schoolName}
-              onChange={handleChange}
-            />
-            {/* Add more school fields as needed */}
           </>
         )}
         <Input
