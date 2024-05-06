@@ -1,4 +1,7 @@
-import React from 'react';
+import React , { useState, useEffect }  from 'react';
+import { auth } from '../../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebaseConfig';
 import {
     Box,
     IconButton, Typography, Button, AppBar,
@@ -8,13 +11,43 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import { useState } from 'react';
 import KeyIcon from '@mui/icons-material/Key';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 
-const VolunteerzDrawer = ({ handleSignOut, pages, icons}) => {
+const VolunteerzDrawer = ({ handleSignOut}) => {
+    const [userData, setUserData] = useState(null);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    try {
+                        const userDocRef = doc(db, 'volunteers', user.uid);
+                        const userDocSnap = await getDoc(userDocRef);
+                        if (userDocSnap.exists()) {
+                            setUserData(userDocSnap.data());
+                            console.log(userDocSnap.data());
+                        } else {
+                            console.log('No such document!');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching user data:', error);
+                    }
+                }
+            });
+        };
+
+        fetchUserData();
+
+        // Clean up the listener when component unmounts
+        return () => {
+            // Detach the listener here if needed
+        };
+    }, []);
+
+    
     const Pages = ['Volunteering Opportunities', 'Issues', 'Settings'];
     const Icons = {
         'Volunteering Opportunities': <KeyIcon />,
@@ -44,7 +77,7 @@ const VolunteerzDrawer = ({ handleSignOut, pages, icons}) => {
                             <MenuIcon />
                         </IconButton>
                         <Typography sx={{ color: 'white', marginRight: '0' }}>My Dashboard</Typography>
-                        <Typography sx={{ color: 'white', marginLeft: 'auto' }}>welcome, volunteersName</Typography>
+                        <Typography sx={{ color: 'white', marginLeft: 'auto' }}>welcome, {userData && userData.surname}</Typography>
                     </Toolbar>
                 </AppBar>
                 <Drawer open={open} >
@@ -59,7 +92,9 @@ const VolunteerzDrawer = ({ handleSignOut, pages, icons}) => {
                         <Avatar src='British.png' sx={{ width: 120, height: 120 }}>
 
                         </Avatar>
+                        
                     </Box>
+                    <Typography variant='h6' sx={{justifyContent: 'center', display: 'flex', mt: 2}}>{userData && userData.email}</Typography>
                     <List>
                         {Pages.map((page, index) => (
                             <ListItem key={index} sx={{ display: 'block' }} >

@@ -1,21 +1,32 @@
-import { Typography } from '@mui/material';
-import React from 'react'
-import KeyIcon from '@mui/icons-material/Key';
-import BugReportIcon from '@mui/icons-material/BugReport';
-import SettingsIcon from '@mui/icons-material/Settings';
-import VolunteerzDrawer from '../Volunteers/VolunteerzDrawer';
+import React from 'react';
+import { Box, Typography } from '@mui/material';
+import SchoolDrawer from './SchoolDrawer';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebaseConfig';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Dashboard from './Dashoboard';
 
 const AdminsDashboard = () => {
-    const adminPages = ['Admin Page 1', 'Admin Page 2', 'Admin Page 3'];
-    const adminIcons = {
-        'Admin Page 1': <KeyIcon />,
-        'Admin Page 2': <BugReportIcon />,
-        'Admin Page 3': <SettingsIcon />,
-    };
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      // Introduce a delay to ensure the sign-out process completes before displaying the toast
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success('Sign-out successful');
+    } catch (error) {
+      console.error('Sign-out error:', error);
+      toast.error('Failed to sign out. Please try again later.');
+    }
+  };
+   
   return (
     <React.Fragment>
-      <Typography variant="h1">Admins Dashboard</Typography>
-      <VolunteerzDrawer  />
+      <SchoolDrawer  handleSignOut={handleSignOut}/>
+      <Box sx={{mt:10}}>
+      <Dashboard />
+      </Box>
+      
     </React.Fragment>
   )
 }

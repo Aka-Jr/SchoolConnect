@@ -1,10 +1,10 @@
 import React from 'react'
-import VolunteerzDrawer from '../Volunteers/VolunteerzDrawer';
+import SchoolDrawer from './SchoolDrawer';
 
 const AdminsDrawer = () => {
   return (
     <React.Fragment>
-      <VolunteerzDrawer />
+      <SchoolDrawer />
     </React.Fragment>
   )
 }

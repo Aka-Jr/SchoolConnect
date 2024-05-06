@@ -97,7 +97,7 @@ const SignupForm = ({ handleSwitchForm }) => {
       // Add the user data to the appropriate collection in Firestore based on userType
       if (userType === 'volunteer') {
         // Add to 'volunteers' collection
-        userData = { ...userData, firstname, surname };
+        userData = { ...userData, firstname, surnamem, phoneNumber};
         await setDoc(doc(db, "volunteers", userId), userData);
 
         // navigate('/user'); // Redirect to user dashboard
@@ -233,6 +233,14 @@ const SignupForm = ({ handleSwitchForm }) => {
           placeholder="Email"
           sx={{ width: '100%', mt: 2 }}
           value={formData.email}
+          onChange={handleChange}
+        />
+        <Input
+          type='text'
+          id='phoneNumber'
+          placeholder="Phone Number"
+          sx={{ width: '100%', mt: 2 }}
+          value={formData.phoneNumber}
           onChange={handleChange}
         />
         <Input

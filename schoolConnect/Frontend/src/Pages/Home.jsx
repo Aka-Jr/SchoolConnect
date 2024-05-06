@@ -10,14 +10,11 @@ const Home = ({ user }) => {
 
   if (user) {
     // Check if the user is a volunteer
-    if (user.volunteer) {
+   
       return <Navigate to="/user" />;
     }
     // Check if the user is a school admin
-    else if (user.school) {
-      return <Navigate to="/sadmin" />;
-    }
-  }
+    
 
   return (
     <React.Fragment>
