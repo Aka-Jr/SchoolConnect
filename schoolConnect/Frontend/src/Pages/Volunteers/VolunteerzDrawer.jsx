@@ -44,7 +44,7 @@ const VolunteerzDrawer = ({ handleSignOut, pages, icons}) => {
                             <MenuIcon />
                         </IconButton>
                         <Typography sx={{ color: 'white', marginRight: '0' }}>My Dashboard</Typography>
-                        <Typography sx={{ color: 'white', marginLeft: 'auto' }}>My Dashboard</Typography>
+                        <Typography sx={{ color: 'white', marginLeft: 'auto' }}>welcome, volunteersName</Typography>
                     </Toolbar>
                 </AppBar>
                 <Drawer open={open} >

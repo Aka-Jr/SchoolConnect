@@ -54,27 +54,49 @@ const LoginForm = ({ handleClose }) => {
     try {
       // Authenticate user with email and password
       const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
-
-      // Fetch additional user data from Firestore
+    
+      // Fetch additional user data from Firestore using the authenticated user ID
       const userId = userCredential.user.uid;
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      const userData = userDoc.data();
-
-      // Redirect based on userType
-      if (userData.userType === 'volunteer') {
-        navigate('/user');
-      } else if (userData.userType === 'school') {
+      const userDocRef = doc(db, 'volunteers', userId);
+      const schoolDocRef = doc(db, 'schools', userId);
+    
+      // Get user and school data simultaneously
+      const [userDocSnap, schoolDocSnap] = await Promise.all([getDoc(userDocRef), getDoc(schoolDocRef)]);
+    
+      // Check if the Firestore document exists in the 'users' collection
+      if (userDocSnap.exists()) {
+        // Document exists, retrieve data
+        const userData = userDocSnap.data();
+        console.log(userData);
+    
+        // Redirect based on userType
+        if (userData.userType === 'volunteer') {
+          navigate('/user');
+        } else if (userData.userType === 'school') {
+          navigate('/sadmin');
+        }
+    
+        // Login successful
+        toast.success('Login successful!');
+        handleClose();
+      } else if (schoolDocSnap.exists()) {
+        // Document exists in the 'schools' collection, redirect to school admin page
         navigate('/sadmin');
+    
+        // Login successful
+        toast.success('Login successful!');
+        handleClose();
+      } else {
+        // Document does not exist in both collections, handle error
+        console.error('User data not found');
+        toast.error('Failed to login. User data not found.');
       }
-      
-      // Login successful
-      toast.success('Login successful!');
-      handleClose();
     } catch (error) {
       // Handle login errors
       console.error('Login error:', error);
       toast.error('Failed to login. Please try again later.');
     }
+    
   };
 
   const signInWithGoogle = async () => {

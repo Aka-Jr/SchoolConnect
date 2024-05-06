@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from '../firebaseConfig';
-import { db } from '../firebaseConfig';
-import { addDoc, collection as addCollection } from "firebase/firestore";
+import { auth, db } from '../firebaseConfig';
+import { addDoc, collection as addCollection, doc, setDoc } from "firebase/firestore";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Button, Input, Typography, Box, FormControl, MenuItem, Select } from '@mui/material';
 import LocalLibraryIcon from '@mui/icons-material/LocalLibrary';
+import { useNavigate } from 'react-router-dom';
 
 const SignupForm = ({ handleSwitchForm }) => {
   const [formData, setFormData] = useState({
@@ -20,8 +20,9 @@ const SignupForm = ({ handleSwitchForm }) => {
     registrationNumber: '',
     phoneNumber: '',
     location: ''
-    // Additional field for school registration
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -35,22 +36,6 @@ const SignupForm = ({ handleSwitchForm }) => {
 
     // Form validation
     const validationErrors = {};
-
-    if (!schoolName && userType === 'school') {
-      validationErrors.schoolName = 'School name is required.';
-    }
-
-    if (!registrationNumber && userType === 'school') {
-      validationErrors.registrationNumber = 'Registration number is required.';
-    }
-
-    if (!phoneNumber && userType === 'school') {
-      validationErrors.phoneNumber = 'Phone number is required.';
-    }
-
-    if (!location && userType === 'school') {
-      validationErrors.location = 'Location is required.';
-    }
 
     if (!email) {
       validationErrors.email = 'Email is required.';
@@ -66,6 +51,24 @@ const SignupForm = ({ handleSwitchForm }) => {
 
     if (password !== confirmPassword) {
       validationErrors.confirmPassword = 'Passwords do not match.';
+    }
+
+    if (userType === 'school') {
+      if (!schoolName) {
+        validationErrors.schoolName = 'School name is required.';
+      }
+
+      if (!registrationNumber) {
+        validationErrors.registrationNumber = 'Registration number is required.';
+      }
+
+      if (!phoneNumber) {
+        validationErrors.phoneNumber = 'Phone number is required.';
+      }
+
+      if (!location) {
+        validationErrors.location = 'Location is required.';
+      }
     }
 
     // Display validation errors using toasts
@@ -95,11 +98,14 @@ const SignupForm = ({ handleSwitchForm }) => {
       if (userType === 'volunteer') {
         // Add to 'volunteers' collection
         userData = { ...userData, firstname, surname };
-        await addDoc(addCollection(db, "volunteers"), userData);
+        await setDoc(doc(db, "volunteers", userId), userData);
+
+        // navigate('/user'); // Redirect to user dashboard
       } else if (userType === 'school') {
-        // Add to 'schools' collection
+        // Add to 'schools' collection with document ID as the authentication user ID
         userData = { ...userData, schoolName, registrationNumber, phoneNumber, location };
-        await addDoc(addCollection(db, "schools"), userData);
+        await setDoc(doc(db, "schools", userId), userData);
+        // navigate('/sadmin'); // Redirect to school admin dashboard
       }
 
       // Clear form inputs
