@@ -14,8 +14,10 @@ const Cards = () => {
                 const listingsSnapshot = await getDocs(listingsCollection);
                 const listingsData = listingsSnapshot.docs.map(doc => doc.data());
                 setListings(listingsData);
+                
             } catch (error) {
                 console.error('Error fetching listings:', error);
+
             }
         };
         fetchListings();

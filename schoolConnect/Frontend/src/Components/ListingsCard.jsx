@@ -5,7 +5,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ModalComponent from './ModalComponent';
 import { deepOrange, deepPurple } from '@mui/material/colors';
 
-const ListingsCard = ({ listings }) => {
+const ListingsCard = ({ listings}) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
     
@@ -19,6 +19,7 @@ const ListingsCard = ({ listings }) => {
 
     const handleNextClick = () => {
         setCurrentIndex(currentIndex + 1);
+      
     };
 
     const handlePreviousClick = () => {
@@ -45,7 +46,7 @@ const ListingsCard = ({ listings }) => {
                         <CardContent sx={{ flexGrow: 1, height: '200px', display: 'flex', flexDirection: 'column' }}>
                             <Box sx={{ flexGrow: 1 }}>
                                 <Typography gutterBottom variant='h5' sx={{ color: 'white', textAlign: 'center' }}>
-                                    {listing.name}
+                                    {listing.schoolName}
                                 </Typography>
                                 <Typography variant='body2' sx={{ color: 'white', textAlign: 'center', marginBottom: '5%', marginTop: '5%' }}>
                                     {listing.description}
@@ -54,7 +55,7 @@ const ListingsCard = ({ listings }) => {
                             <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small' }}>
                                 <IconButton sx={{ color: 'white' }}><LocationOnIcon /></IconButton>
                                 <Typography variant='subtitle'>{listing.location}</Typography>
-                                <IconButton sx={{ color: 'white', marginLeft: '10%' }}><AccessAlarmIcon /></IconButton>
+                                <IconButton sx={{ color: 'white', marginLeft: 'auto' }}><AccessAlarmIcon /></IconButton>
                                 <Typography variant='subtitle'>{listing.numberOfWeeks == 1 ? `${listing.numberOfWeeks} Week` : `${listing.numberOfWeeks} Weeks`}</Typography>
                             </Box>
                         </CardContent>

@@ -32,7 +32,7 @@ const Home = ({ user }) => {
         </Typography>
         <Cards />
       </Container>
-      <footer style={{ backgroundColor: '#0E424C', marginTop: '5%' }}>
+      <footer style={{ backgroundColor: '#0E424C', marginTop: '5%'}}>
         <Container>
           <Typography variant="h6" style={{ color: 'white', textAlign: 'center', padding: '1rem' }}>
             School<span style={{ color: '#A0826A' }}>Connect</span> &copy; {date.getFullYear()}

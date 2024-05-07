@@ -1,18 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
   Checkbox,
   FormControl,
   FormControlLabel,
-  InputLabel,
-  MenuItem,
   Modal,
-  Select,
   TextField,
 } from '@mui/material';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db, auth } from '../../firebaseConfig'; // Import the auth instance from firebaseConfig
+import { doc, getDoc } from 'firebase/firestore';
+import { db, auth } from '../../firebaseConfig';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -22,6 +20,27 @@ const ListingFormModal = ({ handleClose, open }) => {
     numberOfWeeks: '',
     willProvideAccommodation: false,
   });
+
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = auth.currentUser;
+        const userDocRef = doc(db, 'schools', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          setUserData(userDocSnap.data());
+        } else {
+          console.log('No such document!');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -45,15 +64,30 @@ const ListingFormModal = ({ handleClose, open }) => {
       await addDoc(listingRef, {
         ...listingData,
         timestamp: serverTimestamp(),
-        uid: auth.currentUser.uid, // Access the UID of the authenticated user directly from Firebase auth instance
+        uid: auth.currentUser.uid,
+        location: userData.location,
+        schoolName: userData.schoolName,
       });
+
       toast.success('Listing added successfully');
+
+      // Reset form fields
+      setListingData({
+        description: '',
+        numberOfWeeks: '',
+        willProvideAccommodation: false,
+      });
+
       handleClose();
     } catch (error) {
       console.error('Error adding listing:', error);
       toast.error('Failed to add listing: ' + error.message);
     }
   };
+
+  if (!userData) {
+    return null; // or render a loading indicator
+  }
 
   return (
     <Modal
