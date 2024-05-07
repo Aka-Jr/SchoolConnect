@@ -102,7 +102,7 @@ const SchoolDrawer = ({ handleSignOut }) => {
               <MenuIcon />
             </IconButton>
             <Typography sx={{ color: 'white', marginRight: '0' }}>My Dashboard</Typography>
-            <Typography variant='subtitle' sx={{ color: 'white', marginLeft: 'auto' }}>Welcome, {userData && userData.schoolName}</Typography>
+            <Typography variant='subtitle' sx={{ color: 'white', marginLeft: 'auto' }}>{userData && userData.schoolName}</Typography>
           </Toolbar>
         </AppBar>
         <Drawer open={open} >

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Box, Card, CardActions, CardContent, CardMedia, Button, Typography, IconButton } from '@mui/material';
+import { Box, Card, CardActions, CardContent, CardMedia, Button, Typography, IconButton, Avatar } from '@mui/material';
 import AccessAlarmIcon from '@mui/icons-material/AccessAlarm';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ModalComponent from './ModalComponent';
+import { deepOrange, deepPurple } from '@mui/material/colors';
 
 const ListingsCard = ({ listings }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -24,13 +25,7 @@ const ListingsCard = ({ listings }) => {
         setCurrentIndex(currentIndex - 1);
     };
 
-    const renderWeeks = () => {
-        if (listings.numberOfWeeks === 1) {
-          return 'Week';
-        } else {
-          return 'Weeks';
-        }
-      };
+
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -43,8 +38,9 @@ const ListingsCard = ({ listings }) => {
                                 alt='school logo'
                                 height='140'
                                 image={listing.logo} 
-                                sx={{ height: '100px', width: '100px', borderRadius: '50%' }}
+                                sx={{ height: '100px', width: '100px', borderRadius: '50%', bgcolor: deepPurple[500] }}
                             />
+                           
                         </Box>
                         <CardContent sx={{ flexGrow: 1, height: '200px', display: 'flex', flexDirection: 'column' }}>
                             <Box sx={{ flexGrow: 1 }}>
@@ -59,7 +55,7 @@ const ListingsCard = ({ listings }) => {
                                 <IconButton sx={{ color: 'white' }}><LocationOnIcon /></IconButton>
                                 <Typography variant='subtitle'>{listing.location}</Typography>
                                 <IconButton sx={{ color: 'white', marginLeft: '10%' }}><AccessAlarmIcon /></IconButton>
-                                <Typography variant='subtitle'>{listing.numberOfWeeks} {renderWeeks()}</Typography>
+                                <Typography variant='subtitle'>{listing.numberOfWeeks == 1 ? `${listing.numberOfWeeks} Week` : `${listing.numberOfWeeks} Weeks`}</Typography>
                             </Box>
                         </CardContent>
                         <CardActions sx={{ justifyContent: 'center' }}>
