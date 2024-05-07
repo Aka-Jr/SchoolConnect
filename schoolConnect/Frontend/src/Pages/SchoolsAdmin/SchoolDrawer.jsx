@@ -9,22 +9,26 @@ import {
   ListItemIcon, ListItemText,
   Avatar
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import KeyIcon from '@mui/icons-material/Key';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
-import EditUserInfo from './EditUserInfo';
+import EditSchoolInfo from './EditSchoolInfo';
+import ListingFormModal from './ListingFormModal';
 
 const SchoolDrawer = ({ handleSignOut }) => {
   const [userData, setUserData] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const [user, setUser] = useState(null); // Add user state
 
   useEffect(() => {
     const fetchUserData = async () => {
       auth.onAuthStateChanged(async (user) => {
         if (user) {
+          setUser(user); // Set user state
           try {
             const userDocRef = doc(db, 'schools', user.uid);
             const userDocSnap = await getDoc(userDocRef);
@@ -63,15 +67,15 @@ const SchoolDrawer = ({ handleSignOut }) => {
     }
   };
 
-  const Pages = ['Volunteering Opportunities', 'Issues', 'Profile'];
+  const Pages = ['Volunteering Opportunities', 'Issues', 'Edit Profile'];
   const Icons = {
     'Volunteering Opportunities': <KeyIcon />,
     'Issues': <BugReportIcon />,
-    'Profile': <SettingsIcon />,
+    'Edit Profile': <EditIcon />,
   };
 
   const handleListItemClick = (page) => {
-    if (page === 'Profile') {
+    if (page === 'Edit Profile') {
       handleOpenModal();
     }
   };
@@ -98,7 +102,7 @@ const SchoolDrawer = ({ handleSignOut }) => {
               <MenuIcon />
             </IconButton>
             <Typography sx={{ color: 'white', marginRight: '0' }}>My Dashboard</Typography>
-            <Typography variant='subtitle' sx={{ color: 'white', marginLeft: 'auto' }}>welcome, {userData && userData.schoolName}</Typography>
+            <Typography variant='subtitle' sx={{ color: 'white', marginLeft: 'auto' }}>Welcome, {userData && userData.schoolName}</Typography>
           </Toolbar>
         </AppBar>
         <Drawer open={open} >
@@ -140,12 +144,13 @@ const SchoolDrawer = ({ handleSignOut }) => {
           </List>
         </Drawer>
       </Box>
-      <EditUserInfo
+      <EditSchoolInfo
         open={openModal}
         handleClose={handleCloseModal}
         userData={userData}
         updateUser={updateUser}
       />
+      
     </React.Fragment>
   )
 }

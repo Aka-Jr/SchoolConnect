@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Modal, Box, Typography, Button, TextField } from '@mui/material';
 
-const EditUserInfo = ({ open, handleClose, userData, updateUser }) => {
+const EditSchoolInfo = ({ open, handleClose, userData, updateUser }) => {
     // Initialize formData with userData or empty strings if userData is null
-    const [formData, setFormData] = useState(userData || { schoolName: '', phoneNumber: '' });
+    const [formData, setFormData] = useState(userData || { schoolName: '', phoneNumber: '', location: ''});
 
     const handleChange = (e) => {
         const { id, value } = e.target;
@@ -34,13 +34,13 @@ const EditUserInfo = ({ open, handleClose, userData, updateUser }) => {
                 p: 4,
             }}>
                 <Typography id="modal-modal-title" variant="h6" component="h2">
-                    Edit User Information
+                    Edit Your Information
                 </Typography>
                 <form onSubmit={handleSubmit}>
                     <TextField
                         id="schoolName"
                         label="School Name"
-                        value={formData.schoolName} // Pre-fill value
+                        value={userData ? userData.schoolName : ''} // Pre-fill value
                         onChange={handleChange}
                         placeholder={userData ? userData.schoolName : 'School Name'} // Placeholder or pre-filled value
                         fullWidth
@@ -48,13 +48,33 @@ const EditUserInfo = ({ open, handleClose, userData, updateUser }) => {
                     />
                     <TextField
                         id="phoneNumber"
-                        label="phoneNumber"
-                        value={formData.phoneNumber} // Pre-fill value
+                        label="Phone Number"
+                        value={userData ? userData.phoneNumber : ''} // Pre-fill value
                         onChange={handleChange}
                         placeholder={userData ? userData.phoneNumber : 'Phone Number'} // Placeholder or pre-filled value
                         fullWidth
                         margin="normal"
                     />
+                    <TextField
+                        id="email"
+                        label="Email"
+                        value={userData ? userData.email : ''}
+                        // For email, it's usually read-only
+                        InputProps={{
+                            readOnly: true,
+                        }}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <TextField
+                        id="location"
+                        label="Location"
+                        value={userData ? userData.location : ''}
+                        onChange={handleChange}
+                        fullWidth
+                        margin="normal"
+                    />
+
                     {/* Add more fields as needed */}
                     <Button type="submit" variant="contained" color="primary">
                         Save Changes
@@ -65,4 +85,4 @@ const EditUserInfo = ({ open, handleClose, userData, updateUser }) => {
     );
 };
 
-export default EditUserInfo;
+export default EditSchoolInfo;
