@@ -3,18 +3,19 @@ import Cards from '../Components/Cards';
 import { Badge, Container, Typography } from '@mui/material';
 import { Navigate } from 'react-router-dom';
 import NavigationBar from '../Components/NavigationBar';
+import Footer from '../Components/Footer';
 
 const Home = ({ user }) => {
   const newApplicationsCount = "new";
-  const date = new Date();
+
 
   if (user) {
     // Check if the user is a volunteer
-   
-      return <Navigate to="/user" />;
-    }
-    // Check if the user is a school admin
-    
+
+    return <Navigate to="/user" />;
+  }
+  // Check if the user is a school admin
+
 
   return (
     <React.Fragment>
@@ -31,14 +32,9 @@ const Home = ({ user }) => {
           All
         </Typography>
         <Cards />
+
       </Container>
-      <footer style={{ backgroundColor: '#0E424C', marginTop: '5%'}}>
-        <Container>
-          <Typography variant="h6" style={{ color: 'white', textAlign: 'center', padding: '1rem' }}>
-            School<span style={{ color: '#A0826A' }}>Connect</span> &copy; {date.getFullYear()}
-          </Typography>
-        </Container>
-      </footer>
+      <Footer />
     </React.Fragment>
   )
 }

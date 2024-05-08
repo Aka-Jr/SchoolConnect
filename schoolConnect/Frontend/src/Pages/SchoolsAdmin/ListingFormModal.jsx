@@ -67,6 +67,7 @@ const ListingFormModal = ({ handleClose, open }) => {
         uid: auth.currentUser.uid,
         location: userData.location,
         schoolName: userData.schoolName,
+        email: userData.email,
       });
 
       toast.success('Listing added successfully');

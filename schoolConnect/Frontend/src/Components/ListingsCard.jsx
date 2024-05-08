@@ -1,32 +1,57 @@
-import React, { useState } from 'react';
-import { Box, Card, CardActions, CardContent, CardMedia, Button, Typography, IconButton, Avatar } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Card, CardActions, CardContent, CardMedia, Button, Typography, IconButton } from '@mui/material';
 import AccessAlarmIcon from '@mui/icons-material/AccessAlarm';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import ModalComponent from './ModalComponent';
-import { deepOrange, deepPurple } from '@mui/material/colors';
+import ApplicationModal from '../Pages/Volunteers/ApplicationModal';
+import ModalComponent from './ModalComponent'; // Import the ModalComponent for login/sign up
+import { deepPurple } from '@mui/material/colors';
+import { auth } from '../firebaseConfig';
 
-const ListingsCard = ({ listings}) => {
+const ListingsCard = ({ listings }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
-    
-    const handleApplyButtonClick = () => {
-        setIsModalOpen(true); // Open the modal when the apply button is clicked
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // State for login modal
+    const [selectedListingId, setSelectedListingId] = useState(null); // State for selected listing ID
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                setIsAuthenticated(true); // Set isAuthenticated to true if a user is logged in
+            } else {
+                setIsAuthenticated(false); // Set isAuthenticated to false if no user is logged in
+            }
+        });
+
+        // Clean up the listener when the component unmounts
+        return unsubscribe;
+    }, []);
+
+    const handleApplyButtonClick = (listingId) => {
+        if (isAuthenticated) {
+            setIsApplicationModalOpen(true); // Open the application modal if the user is authenticated
+            setSelectedListingId(listingId); // Set the selected listing ID
+        } else {
+            setIsLoginModalOpen(true); // Open the login/sign up modal if the user is not authenticated
+        }
     };
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false); // Close the modal
+    const handleCloseApplicationModal = () => {
+        setIsApplicationModalOpen(false); // Close the application modal
+        setSelectedListingId(null); // Reset the selected listing ID
+    };
+
+    const handleCloseLoginModal = () => {
+        setIsLoginModalOpen(false); // Close the login/sign up modal
     };
 
     const handleNextClick = () => {
         setCurrentIndex(currentIndex + 1);
-      
     };
 
     const handlePreviousClick = () => {
         setCurrentIndex(currentIndex - 1);
     };
-
-
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -38,10 +63,9 @@ const ListingsCard = ({ listings}) => {
                                 component='img'
                                 alt='school logo'
                                 height='140'
-                                image={listing.logo} 
+                                image={listing.logo}
                                 sx={{ height: '100px', width: '100px', borderRadius: '50%', bgcolor: deepPurple[500] }}
                             />
-                           
                         </Box>
                         <CardContent sx={{ flexGrow: 1, height: '200px', display: 'flex', flexDirection: 'column' }}>
                             <Box sx={{ flexGrow: 1 }}>
@@ -60,7 +84,7 @@ const ListingsCard = ({ listings}) => {
                             </Box>
                         </CardContent>
                         <CardActions sx={{ justifyContent: 'center' }}>
-                            <Button variant='contained' sx={{ textAlign: 'center', width: '100%', bgcolor: '#A0826A' }} onClick={handleApplyButtonClick}>Apply</Button>
+                            <Button variant='contained' sx={{ textAlign: 'center', width: '100%', bgcolor: '#A0826A' }} onClick={() => handleApplyButtonClick(listing.id)}>Apply</Button>
                         </CardActions>
                     </Card>
                 ))}
@@ -69,7 +93,15 @@ const ListingsCard = ({ listings}) => {
                 <Button variant='contained' onClick={handlePreviousClick} disabled={currentIndex === 0}>Previous</Button>
                 <Button variant='contained' onClick={handleNextClick} disabled={currentIndex + 3 >= listings.length}>Next</Button>
             </Box>
-            <ModalComponent open={isModalOpen} handleClose={handleCloseModal} formType='login' />
+            <ApplicationModal
+                open={isApplicationModalOpen}
+                handleClose={handleCloseApplicationModal}
+                schoolUID={listings[currentIndex]?.uid} 
+                schoolName={listings[currentIndex]?.schoolName}// Pass the school UID of the selected listing
+                volunteerUID={auth.currentUser?.uid}
+                listingUID={selectedListingId} // Pass the selected listing ID
+            /> {/* Render the ApplicationModal */}
+            <ModalComponent open={isLoginModalOpen} handleClose={handleCloseLoginModal} formType='login' /> {/* Render the login/sign up modal */}
         </Box>
     );
 }

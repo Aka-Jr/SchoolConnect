@@ -91,7 +91,8 @@ const SignupForm = ({ handleSwitchForm }) => {
       // Define the data object to be stored in Firestore
       let userData = {
         email,
-        userType
+        userType,
+        uid: userId
       };
 
       // Add the user data to the appropriate collection in Firestore based on userType
