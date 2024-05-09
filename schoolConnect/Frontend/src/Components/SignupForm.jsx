@@ -98,8 +98,8 @@ const SignupForm = ({ handleSwitchForm }) => {
       // Add the user data to the appropriate collection in Firestore based on userType
       if (userType === 'volunteer') {
         // Add to 'volunteers' collection
-        userData = { ...userData, firstname, surnamem, phoneNumber};
-        await setDoc(doc(db, "volunteers", userId), userData);
+        userData = { ...userData, firstname, surname, phoneNumber};
+        await setDoc(doc(db, "users", userId), userData);
 
         // navigate('/user'); // Redirect to user dashboard
       } else if (userType === 'school') {

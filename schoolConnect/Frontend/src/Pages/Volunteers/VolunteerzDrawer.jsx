@@ -24,7 +24,7 @@ const VolunteerzDrawer = ({ handleSignOut}) => {
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     try {
-                        const userDocRef = doc(db, 'volunteers', user.uid);
+                        const userDocRef = doc(db, 'users', user.uid);
                         const userDocSnap = await getDoc(userDocRef);
                         if (userDocSnap.exists()) {
                             setUserData(userDocSnap.data());

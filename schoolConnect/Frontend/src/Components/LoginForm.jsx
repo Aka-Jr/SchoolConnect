@@ -57,7 +57,7 @@ const LoginForm = ({ handleClose }) => {
     
       // Fetch additional user data from Firestore using the authenticated user ID
       const userId = userCredential.user.uid;
-      const userDocRef = doc(db, 'volunteers', userId);
+      const userDocRef = doc(db, 'users', userId);
       const schoolDocRef = doc(db, 'schools', userId);
     
       // Get user and school data simultaneously
