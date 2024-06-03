@@ -5,6 +5,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import SideBar from './SideBar';
 import { Link, useLocation } from 'react-router-dom';
 import ModalComponent from './ModalComponent';
+import { ToastContainer } from 'react-toastify';
 
 const NavigationBar = () => {
     const [value, setValue] = useState(0);
@@ -38,6 +39,7 @@ const NavigationBar = () => {
 
     return (
         <React.Fragment>
+        <div>
             <AppBar position="fixed" sx={{ bgcolor: '#0E424C', borderRadius: '50px' }}>
                 <Toolbar>
                     <IconButton>
@@ -65,6 +67,8 @@ const NavigationBar = () => {
                 </Toolbar>
             </AppBar>
             <ModalComponent open={isModalOpen} handleClose={handleModalClose} formType={formType} handleSwitchForm={handleSwitchForm} />
+            </div>
+            <ToastContainer />
         </React.Fragment>
     );
 }

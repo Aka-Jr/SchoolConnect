@@ -69,7 +69,10 @@ const EditSchoolInfo = ({ open, handleClose, userData, updateUser }) => {
                     <TextField
                         id="location"
                         label="Location"
-                        value={userData ? userData.location : ''}
+                        value={userData ? `${userData.ward}, ${userData.district}, ${userData.region} ` : ''}
+                        InputProps={{
+                            readOnly: true,
+                        }}
                         onChange={handleChange}
                         fullWidth
                         margin="normal"

@@ -9,12 +9,12 @@ const Home = ({ user }) => {
   const newApplicationsCount = "new";
 
 
-  if (user) {
-    // Check if the user is a volunteer
+  // if (user) {
+  //   // Check if the user is a volunteer
 
-    return <Navigate to="/user" />;
-  }
-  // Check if the user is a school admin
+  //   return <Navigate to="/user" />;
+  // }
+  // // Check if the user is a school admin
 
 
   return (

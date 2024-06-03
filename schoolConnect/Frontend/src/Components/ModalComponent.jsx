@@ -2,9 +2,11 @@ import React from 'react';
 import { Modal, Typography, Box, Button } from '@mui/material';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
+import { ToastContainer } from 'react-toastify';
 
 const ModalComponent = ({ open, handleClose, formType, handleSwitchForm }) => {
     return (
+        <div>
         <Modal
             open={open}
             onClose={handleClose}
@@ -20,11 +22,14 @@ const ModalComponent = ({ open, handleClose, formType, handleSwitchForm }) => {
                     bgcolor: 'white',
                     boxShadow: 24,
                     p: 4,
-                    width: '40%',
+                    width: '80%',
                     borderRadius: '10px',
                     textAlign: 'center',
                     justifyContent: 'center',
                     alignItems: 'center',
+                    maxHeight: '80%',
+                    overflow: 'hidden',
+                    overflowY: 'auto',
                 }}
             >
                 <Typography id="modal-modal-title" variant="h6" component="h2">
@@ -52,6 +57,7 @@ const ModalComponent = ({ open, handleClose, formType, handleSwitchForm }) => {
                 </Box>
             </Box>
         </Modal>
+        </div>
     );
 }
 
