@@ -54,8 +54,13 @@ const ApplicationModal = ({ open, handleClose, schoolUID, volunteerUID, listingU
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
                 bgcolor: 'background.paper',
+                borderRadius: '10px',
                 boxShadow: 24,
                 p: 4,
+                width: '50%',
+                maxHeight: '80%',
+                    overflow: 'hidden',
+                    overflowY: 'auto',
             }}>
                 <Typography variant="h5" gutterBottom>Apply to Listing</Typography>
                 <FormControl fullWidth sx={{ marginBottom: 2 }}>
@@ -67,10 +72,21 @@ const ApplicationModal = ({ open, handleClose, schoolUID, volunteerUID, listingU
                         value={selectedSubjects}
                         onChange={handleSubjectChange}
                         renderValue={(selected) => selected.join(', ')} // Render selected subjects as comma-separated string
+                        
                     >
-                        <MenuItem value="Math">Math</MenuItem>
-                        <MenuItem value="Science">Science</MenuItem>
+                        <MenuItem value="Mathematics">Mathematics</MenuItem>
+                        <MenuItem value="Physics">Physics</MenuItem>
+                        <MenuItem value="Chemistry">Chemistry</MenuItem>
+                        <MenuItem value="Biology">Biology</MenuItem>
                         <MenuItem value="English">English</MenuItem>
+                        <MenuItem value="Kiswahili">Kiswahili</MenuItem>
+                        <MenuItem value="History">History</MenuItem>
+                        <MenuItem value="Commerce">Commerce</MenuItem>
+                        <MenuItem value="Book-keeping">Book-keeping</MenuItem>
+                        <MenuItem value="Geography">Geography</MenuItem>
+                        <MenuItem value="Literature">Literature</MenuItem>
+                        <MenuItem value="Islamic Knowledge">Islamic Knowledge</MenuItem>
+                        <MenuItem value="Divinity">Divinity</MenuItem>
                         {/* Add more subjects as needed */}
                     </Select>
                 </FormControl>

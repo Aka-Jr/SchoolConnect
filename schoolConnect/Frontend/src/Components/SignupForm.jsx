@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, FormControl, MenuItem, Select as MUISelect, Typography, Box } from '@mui/material';
+import { Button, FormControl, MenuItem, Select as MUISelect, Typography, Box, CircularProgress } from '@mui/material';
 import LocalLibraryIcon from '@mui/icons-material/LocalLibrary';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -8,6 +8,7 @@ import SchoolSignupForm from './SchoolSignupForm';
 
 const SignupForm = ({ handleSwitchForm }) => {
   const [userType, setUserType] = useState('volunteer'); // Default user type
+  const [loading, setLoading] = useState(false); // Loading state
 
   const handleUserTypeChange = (e) => {
     setUserType(e.target.value);
@@ -31,10 +32,14 @@ const SignupForm = ({ handleSwitchForm }) => {
             <MenuItem value="school">School</MenuItem>
           </MUISelect>
         </FormControl>
-        {userType === 'volunteer' ? (
-          <VolunteerSignupForm handleSwitchForm={handleSwitchForm} />
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <CircularProgress />
+          </Box>
+        ) : userType === 'volunteer' ? (
+          <VolunteerSignupForm handleSwitchForm={handleSwitchForm} setLoading={setLoading} />
         ) : (
-          <SchoolSignupForm handleSwitchForm={handleSwitchForm} />
+          <SchoolSignupForm handleSwitchForm={handleSwitchForm} setLoading={setLoading} />
         )}
       </Box>
       {/* <ToastContainer /> */}

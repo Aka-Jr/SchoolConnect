@@ -7,6 +7,7 @@ import {
   FormControlLabel,
   Modal,
   TextField,
+  Typography,
 } from '@mui/material';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { doc, getDoc } from 'firebase/firestore';
@@ -14,7 +15,7 @@ import { db, auth } from '../../firebaseConfig';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const ListingFormModal = ({ handleClose, open }) => {
+const ListingFormModal = ({ handleClose, open,}) => {
   const [listingData, setListingData] = useState({
     description: '',
     numberOfWeeks: '',
@@ -65,9 +66,16 @@ const ListingFormModal = ({ handleClose, open }) => {
         ...listingData,
         timestamp: serverTimestamp(),
         uid: auth.currentUser.uid,
-        location: userData.location,
+        location: `${userData.ward}, ${userData.district}, ${userData.region}`,
+        region:userData.region,
+        district: userData.district,
+        ward:userData.ward,
         schoolName: userData.schoolName,
         email: userData.email,
+        genderComposition:userData.genderComposition,
+        numberOfStudent: userData.numberOfStudents,
+        isBoarding:userData.isBoarding,
+        isReligious:userData.isReligious
       });
 
       toast.success('Listing added successfully');
@@ -113,6 +121,7 @@ const ListingFormModal = ({ handleClose, open }) => {
           <TextField
             name="description"
             label="Description"
+            placeholder="eg.In need of 6 teachers of Physics and Chemistry"
             value={listingData.description}
             onChange={handleInputChange}
             fullWidth
@@ -139,6 +148,7 @@ const ListingFormModal = ({ handleClose, open }) => {
               label="Will Provide Accommodation"
             />
           </FormControl>
+         
           <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
             Submit
           </Button>

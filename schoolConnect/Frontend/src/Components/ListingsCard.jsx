@@ -7,7 +7,7 @@ import ModalComponent from './ModalComponent'; // Import the ModalComponent for 
 import { deepPurple } from '@mui/material/colors';
 import { auth } from '../firebaseConfig';
 
-const ListingsCard = ({ listings }) => {
+const ListingsCard = ({ listings}) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
@@ -56,8 +56,8 @@ const ListingsCard = ({ listings }) => {
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem', width: '100%' }}>
-                {listings.slice(currentIndex, currentIndex + 3).map((listing, index) => (
-                    <Card key={index} sx={{ maxWidth: 300, bgcolor: '#0E424C', height: '100%' }}>
+                {listings.slice(currentIndex, currentIndex + 3).map((listing) => (
+                    <Card key={listing.id} sx={{ maxWidth: 300, bgcolor: '#0E424C', height: '100%' }}>
                         <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '3%' }}>
                             <CardMedia
                                 component='img'
@@ -67,19 +67,36 @@ const ListingsCard = ({ listings }) => {
                                 sx={{ height: '100px', width: '100px', borderRadius: '50%', bgcolor: deepPurple[500] }}
                             />
                         </Box>
-                        <CardContent sx={{ flexGrow: 1, height: '200px', display: 'flex', flexDirection: 'column' }}>
+                        <CardContent sx={{ flexGrow: 1,  display: 'flex', flexDirection: 'column' }}>
                             <Box sx={{ flexGrow: 1 }}>
                                 <Typography gutterBottom variant='h5' sx={{ color: 'white', textAlign: 'center' }}>
                                     {listing.schoolName}
                                 </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', textAlign: 'center', marginBottom: '5%', marginTop: '5%' }}>
+                                <Typography variant='body2' sx={{ color: 'white',height: '50px', textAlign: 'center', marginBottom: '5%', marginTop: '5%' }}>
                                     {listing.description}
                                 </Typography>
+                                <Typography variant='body2' sx={{ color: 'white',  marginBottom: '2%', marginTop: '2%', right: 'auto'  }}>
+                                   Gender Composition: <span style={{color:'#A0826A', fontWeight: 'bold',}}>{listing.genderComposition}</span>
+                                </Typography>
+                                <Typography variant='body2' sx={{ color: 'white', marginBottom: '2%', marginTop: '2', right: 'auto'  }}>
+                                   Number of Students: <span style={{color:'#A0826A', fontWeight: 'bold',}}>{listing.numberOfStudent}</span>
+                                </Typography>
+                                <Typography variant='body2' sx={{ color: 'white', marginTop: '2%', right: 'auto'  }}>
+                                   Boarding Status: <span style={{color:'#A0826A', fontWeight: 'bold'}}>{listing.isBoarding == 'No' ? 'Not boarding' : 'Boarding'}</span>
+                                </Typography>
+                                <Typography variant='body2' sx={{ color: 'white', marginTop: '2%', right: 'auto'  }}>
+                                   Religious Status: <span style={{color:'#A0826A', fontWeight: 'bold'}}>{listing.isReligious != 'yes'  ? 'Not religious' : 'Religious'}</span>
+                                </Typography>
+                                
                             </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small' }}>
+                        </CardContent>
+                        <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small' }}>
                                 <IconButton sx={{ color: 'white' }}><LocationOnIcon /></IconButton>
                                 <Typography variant='subtitle'>{listing.location}</Typography>
-                                <IconButton sx={{ color: 'white', marginLeft: 'auto' }}><AccessAlarmIcon /></IconButton>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small' }}>
+                                <IconButton sx={{ color: 'white' }}><AccessAlarmIcon /></IconButton>
                                 <Typography variant='subtitle'>{listing.numberOfWeeks == 1 ? `${listing.numberOfWeeks} Week` : `${listing.numberOfWeeks} Weeks`}</Typography>
                             </Box>
                         </CardContent>
@@ -96,8 +113,8 @@ const ListingsCard = ({ listings }) => {
             <ApplicationModal
                 open={isApplicationModalOpen}
                 handleClose={handleCloseApplicationModal}
-                schoolUID={listings[currentIndex]?.uid} 
-                schoolName={listings[currentIndex]?.schoolName}// Pass the school UID of the selected listing
+                schoolUID={listings.find(listing => listing.id === selectedListingId)?.uid}
+                schoolName={listings.find(listing => listing.id === selectedListingId)?.schoolName}
                 volunteerUID={auth.currentUser?.uid}
                 listingUID={selectedListingId} // Pass the selected listing ID
             /> {/* Render the ApplicationModal */}

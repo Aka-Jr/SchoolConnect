@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Box, Typography, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Paper } from '@mui/material';
 import { collection, query, where, getDocs } from 'firebase/firestore'; // Import Firestore functions
 import { auth, db } from '../../firebaseConfig'; // Import Firebase auth
+import VolunteerProfile from './VolunteerProfile';
 
-const ApplicationModal = ({ open, handleClose }) => {
+const VolunteerProfileModal = ({ open, handleClose }) => {
     const [applications, setApplications] = useState([]);
 
     useEffect(() => {
@@ -53,39 +54,10 @@ const ApplicationModal = ({ open, handleClose }) => {
                 borderRadius: '10px',
             }}>
                 <Typography variant="h5" gutterBottom sx={{ color: 'white', }}>Application Details</Typography>
-                <Box sx={{ maxHeight: '400px', overflow: 'auto', }}> {/* Set a fixed height and enable scrolling */}
-                    <TableContainer component={Paper} sx={{ bgcolor: '#0E424C', }}>
-                        <Table>
-                            <TableHead>
-                                <TableRow >
-                                    <TableCell sx={{ color: 'white', }}>S/N</TableCell>
-                                    <TableCell sx={{ color: 'white', }}>School Name</TableCell>
-                                    <TableCell sx={{ color: 'white', }}>Subjects</TableCell>
-                                    <TableCell sx={{ color: 'white', }}>Status</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {applications.map((application, index) => (
-                                    <TableRow key={application.id}>
-                                        <TableCell sx={{ color: 'white', }}>{index + 1}</TableCell>
-                                        <TableCell sx={{ color: 'white', }}>{application.schoolName}</TableCell>
-                                        <TableCell sx={{ color: 'white', }}>
-                                            {application.subjects.map(subject => (
-                                                <Typography key={subject}>{subject}</Typography>
-                                            ))}
-                                        </TableCell>
-                                        <TableCell sx={{ color: 'white', }}>
-                                            <span style={{ color: getStatusColor(application.status) }}>{application.status}</span>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Box>
+                <VolunteerProfile />
             </Box>
         </Modal>
     );
 };
 
-export default ApplicationModal;
+export default VolunteerProfileModal;

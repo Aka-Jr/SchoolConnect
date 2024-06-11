@@ -1,6 +1,6 @@
 import React , { useState, useEffect }  from 'react';
 import { auth } from '../../firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc  } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import {
     Box,
@@ -15,9 +15,11 @@ import KeyIcon from '@mui/icons-material/Key';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import EditVolunteerInfo from './EditVolunteerInfo';
 
 const VolunteerzDrawer = ({ handleSignOut}) => {
     const [userData, setUserData] = useState(null);
+    const [openModal, setOpenModal] = useState(false);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -48,12 +50,37 @@ const VolunteerzDrawer = ({ handleSignOut}) => {
     }, []);
 
     
-    const Pages = ['Volunteering Opportunities', 'Issues', 'Settings'];
+    const Pages = ['Volunteering Opportunities', 'Issues', 'Edit Profile',];
     const Icons = {
         'Volunteering Opportunities': <KeyIcon />,
         'Issues': <BugReportIcon />,
-        'Settings': <SettingsIcon />,
+        'Edit Profile': <SettingsIcon />,
     };
+
+    const handleListItemClick = (page) => {
+        if (page === 'Edit Profile') {
+            handleOpenModal();
+        }
+      };
+
+      const updateUser = async (updatedData) => {
+        const user = auth.currentUser;
+        const userDocRef = doc(db, 'schools', user.uid);
+        try {
+          await updateDoc(userDocRef, updatedData);
+          setUserData(updatedData); // Update state with new data
+        } catch (error) {
+          console.error('Error updating user data:', error);
+        }
+      };
+
+      const handleOpenModal = () => {
+        setOpenModal(true);
+      };
+    
+      const handleCloseModal = () => {
+        setOpenModal(false);
+      };
 
     const [open, setOpen] = useState(false);
     const handleDrawerOpen = () => {
@@ -97,7 +124,7 @@ const VolunteerzDrawer = ({ handleSignOut}) => {
                     <Typography variant='h6' sx={{justifyContent: 'center', display: 'flex', mt: 2}}>{userData && userData.email}</Typography>
                     <List>
                         {Pages.map((page, index) => (
-                            <ListItem key={index} sx={{ display: 'block' }} >
+                            <ListItem key={index} sx={{ display: 'block' }}  onClick={() => handleListItemClick(page)}>
                                 <ListItemButton>
                                     <ListItemIcon>
                                         {Icons[page]}
@@ -123,6 +150,12 @@ const VolunteerzDrawer = ({ handleSignOut}) => {
                     
                 </Drawer>
             </Box>
+            <EditVolunteerInfo
+        open={openModal}
+        handleClose={handleCloseModal}
+        userData={userData}
+        updateUser={updateUser}
+      />
 
         </React.Fragment>
     )

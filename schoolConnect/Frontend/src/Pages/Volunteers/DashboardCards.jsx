@@ -4,9 +4,12 @@ import RedeemIcon from '@mui/icons-material/Redeem';
 import AssistantIcon from '@mui/icons-material/Assistant';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ApplicationDetailsModal from './ApplicationDetailsModal'; // Import the modal component
+import VolunteerProfile from './VolunteerProfile';
+import VolunteerProfileModal from './VolunteerProfileModal';
 
 const DashboardCards = () => {
     const [isModalOpen, setIsModalOpen] = useState(false); // State to track whether the modal is open
+    const [isOpen, setIsOpen] = useState(false);
 
     // Function to handle opening the modal
     const handleOpenModal = () => {
@@ -16,6 +19,15 @@ const DashboardCards = () => {
     // Function to handle closing the modal
     const handleCloseModal = () => {
         setIsModalOpen(false);
+    };
+
+    const handleOpen = () => {
+        setIsOpen(true);
+    };
+
+    // Function to handle closing the modal
+    const handleClose = () => {
+        setIsOpen(false);
     };
 
     return (
@@ -44,8 +56,16 @@ const DashboardCards = () => {
                     </Grid>
                     <Grid item xs={3}>
                         <Card sx={{ bgcolor: '#0E424C', textAlign: 'center' }}>
-                            <Typography sx={{ color: 'white' }}>Awarded Certificates</Typography>
-                            {/* Content for Awarded Certificates */}
+                            <Typography sx={{ color: 'white' }}>My Education Details</Typography>
+                            <CardContent>
+                                <IconButton sx={{ color: 'white' }}>
+                                    <ArrowUpwardIcon />
+                                </IconButton>
+                            </CardContent>
+                            <CardActions sx={{ justifyContent: 'center' }}>
+                                <Button sx={{ color: 'white', width: '100%' }} onClick={handleOpen}>View</Button>
+                            </CardActions>
+
                         </Card>
                     </Grid>
                 </Grid>
@@ -53,6 +73,11 @@ const DashboardCards = () => {
             <ApplicationDetailsModal
                 open={isModalOpen}
                 handleClose={handleCloseModal}
+            />
+            <VolunteerProfileModal
+
+                open={isOpen}
+                handleClose={handleClose}
             />
         </React.Fragment>
     );
