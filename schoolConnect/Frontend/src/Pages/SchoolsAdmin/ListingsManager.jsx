@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Box, Table, TableHead, TableBody, TableCell, TableRow, IconButton, Typography, Tooltip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BlockIcon from '@mui/icons-material/Block';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { db, auth } from '../../firebaseConfig';
-import { collection, getDocs, deleteDoc, doc, query, where } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, query, where, updateDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -44,8 +45,19 @@ const ListingsManager = ({ open, handleClose }) => {
         }
     };
 
-    const handleMakeUnavailable = (id) => {
-        console.log(`Make Listing ${id} Unavailable`);
+    const handleUpdateStatus = async (id, newStatus) => {
+        try {
+            const listingRef = doc(db, 'listings', id);
+            await updateDoc(listingRef, { status: newStatus });
+            // Update the state to reflect the change
+            setListings(prevListings => prevListings.map(listing =>
+                listing.id === id ? { ...listing, status: newStatus } : listing
+            ));
+            toast.success(`Listing status updated to ${newStatus}`);
+        } catch (error) {
+            console.error(`Error updating listing status to ${newStatus}:`, error);
+            toast.error('Failed to update listing status');
+        }
     };
 
     return (
@@ -66,29 +78,37 @@ const ListingsManager = ({ open, handleClose }) => {
                     overflowY: 'auto', // Enable vertical scrolling
                 }}
             >
-                <Typography variant="h5" gutterBottom sx={{color: 'white'}}>Listings</Typography>
+                <Typography variant="h5" gutterBottom sx={{ color: 'white' }}>Listings</Typography>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell sx={{color: 'white'}}>Description</TableCell>
-                            <TableCell sx={{color: 'white'}}>Accommodation</TableCell>
-                            <TableCell sx={{color: 'white'}}>Timestamp</TableCell>
-                            <TableCell align="right" sx={{color: 'white'}}>Actions</TableCell>
+                            <TableCell sx={{ color: 'white' }}>Description</TableCell>
+                            <TableCell sx={{ color: 'white' }}>Accommodation</TableCell>
+                            <TableCell sx={{ color: 'white' }}>Timestamp</TableCell>
+                            <TableCell sx={{ color: 'white' }}>Status</TableCell>
+                            <TableCell align="right" sx={{ color: 'white' }}>Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {listings.map((listing) => (
                             <TableRow key={listing.id}>
-                                <TableCell sx={{color: 'white'}}>{listing.description}</TableCell>
-                                <TableCell sx={{color: 'white'}}>{listing.willProvideAccommodation ? 'Yes' : 'No'}</TableCell>
-                                <TableCell sx={{color: 'white'}}>{listing.timestamp && new Date(listing.timestamp.toDate()).toLocaleString()}</TableCell>
+                                <TableCell sx={{ color: 'white' }}>{listing.description}</TableCell>
+                                <TableCell sx={{ color: 'white' }}>{listing.willProvideAccommodation ? 'Yes' : 'No'}</TableCell>
+                                <TableCell sx={{ color: 'white' }}>{listing.timestamp && new Date(listing.timestamp.toDate()).toLocaleString()}</TableCell>
+                                <TableCell sx={{ color: 'white' }}>{listing.status}</TableCell>
                                 <TableCell align="right">
                                     <Tooltip title="Delete">
                                         <IconButton onClick={() => handleDeleteListing(listing.id)} sx={{ color: 'red' }}><DeleteIcon /></IconButton>
                                     </Tooltip>
-                                    <Tooltip title="Make Unavailable">
-                                        <IconButton onClick={() => handleMakeUnavailable(listing.id)} sx={{color: 'white'}}><BlockIcon /></IconButton>
-                                    </Tooltip>
+                                    {listing.status === 'ongoing' ? (
+                                        <Tooltip title="Make Unavailable">
+                                            <IconButton onClick={() => handleUpdateStatus(listing.id, 'unavailable')} sx={{ color: 'white' }}><BlockIcon /></IconButton>
+                                        </Tooltip>
+                                    ) : (
+                                        <Tooltip title="Make Available">
+                                            <IconButton onClick={() => handleUpdateStatus(listing.id, 'ongoing')} sx={{ color: 'white' }}><CheckCircleIcon /></IconButton>
+                                        </Tooltip>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         ))}

@@ -113,12 +113,12 @@ const VolunteerProfile = () => {
               <img
                 src={userData.certificateURL}
                 alt="certificate"
-                style={{ width: '100%', height: 'auto' }}
+                style={{ width: '10%', height: 'auto', right:'10%'}}
               />
             )}
             <Button
               variant="contained"
-              sx={{ mt: 2 }}
+              sx={{ mt: 2, left: '10%'}}
               onClick={() => window.open(userData.certificateURL, '_blank')}
             >
               Download Certificate

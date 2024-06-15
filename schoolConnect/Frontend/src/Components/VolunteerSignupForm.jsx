@@ -28,11 +28,13 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
     employmentStatus: '',
     region: '',
     district: '',
-    ward: ''
+    ward: '',
+    subjects: []
   });
 
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
+  const [uploadStatus, setUploadStatus] = useState('');
 
   useEffect(() => {
     if (formData.region) {
@@ -77,10 +79,14 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
     setFormData(prevFormData => ({ ...prevFormData, [id]: option.value }));
   };
 
+  const handleSubjectsChange = (selectedOptions) => {
+    setFormData(prevFormData => ({ ...prevFormData, subjects: selectedOptions.map(option => option.value) }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { firstname, surname, email, region, district, ward, password, confirmPassword, phoneNumber, gender, age, maritalStatus, educationLevel, certificate, employmentStatus } = formData;
+    const { firstname, surname, email, region, district, ward, password, confirmPassword, phoneNumber, gender, age, maritalStatus, educationLevel, certificate, employmentStatus, subjects } = formData;
 
     const validationErrors = {};
 
@@ -112,6 +118,8 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
     if (Object.keys(validationErrors).length > 0) return;
 
     try {
+      setUploadStatus('Uploading certificate...'); // Update status before upload
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
 
@@ -120,6 +128,8 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
         const storageRef = ref(storage, `certificates/${userId}/${certificate.name}`);
         await uploadBytes(storageRef, certificate, { contentType: certificate.type });
         certificateURL = await getDownloadURL(storageRef);
+        setUploadStatus('Certificate uploaded successfully.'); // Update status after upload
+        toast.success(setUploadStatus);
       }
 
       const userData = {
@@ -137,7 +147,8 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
         employmentStatus,
         region,
         district,
-        ward
+        ward,
+        subjects
       };
 
       await setDoc(doc(db, "users", userId), userData);
@@ -158,7 +169,8 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
         certificateURL: '',
         region: '',
         district: '',
-        ward: ''
+        ward: '',
+        subjects: []
       });
 
       toast.success('Registration successful!');
@@ -229,9 +241,9 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
             value={formData.gender}
             onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
           >
-            <FormControlLabel value="male" control={<Radio />} label="Male" />
-            <FormControlLabel value="female" control={<Radio />} label="Female" />
-            <FormControlLabel value="other" control={<Radio />} label="Other" />
+            <FormControlLabel value="Male" control={<Radio />} label="Male" />
+            <FormControlLabel value="Female" control={<Radio />} label="Female" />
+            {/* <FormControlLabel value="other" control={<Radio />} label="Other" /> */}
           </RadioGroup>
         </FormControl>
         <Input
@@ -251,8 +263,8 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
             id="maritalStatus"
             displayEmpty
           >
-            <MenuItem value="single">Single</MenuItem>
-            <MenuItem value="married">Married</MenuItem>
+            <MenuItem value="Single">Single</MenuItem>
+            <MenuItem value="Married">Married</MenuItem>
           </MUISelect>
         </FormControl>
 
@@ -286,6 +298,12 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
               <DeleteIcon />
             </IconButton>
           </Box>
+        )}
+
+        {uploadStatus && ( // Display upload status message
+          <Typography variant="body2" sx={{ mt: 2, color: '#0E424C' }}>
+            {uploadStatus}
+          </Typography>
         )}
 
         <FormControl component="fieldset" sx={{ width: '100%', mt: 2 }}>
@@ -341,6 +359,33 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
           </Grid>
 
         </Box>
+
+        <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Subjects Capable of Teaching</Typography></Divider>
+        <Select
+          isMulti
+          id="subjects"
+          placeholder="Select Subjects"
+          options={[
+            { label: 'Advance Mathematics', value: 'Advance mathematics' },
+            { label: 'Basic Mathematics', value: 'basic mathematics' },
+            { label: 'English', value: 'english' },
+            { label: 'Physics', value: 'physics' },
+            { label: 'chemistry', value: 'chemistry' },
+            { label: 'Biology', value: 'biology' },
+            { label: 'Economics', value: 'economics' },
+            { label: 'Geography', value: 'geography' },
+            { label: 'Civics', value: 'civics' },
+            { label: 'General Studies', value: 'general studies' },
+            { label: 'History', value: 'history' },
+            { label: 'Islamic Knowledge', value: 'islamic knowledge' },
+            { label: 'Bible Knowledge', value: 'bible knowledge' },
+            { label: 'Divinity', value: 'divinity' },
+            // Add more subjects as needed
+          ]}
+          value={formData.subjects.map(subject => ({ label: subject, value: subject }))}
+          onChange={handleSubjectsChange}
+          sx={{ width: '100%', mt: 2 }}
+        />
 
         <Input
           type='password'

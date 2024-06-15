@@ -1,48 +1,46 @@
 import React, { useState } from 'react';
-import { Modal, Box, Typography, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { collection, addDoc, Timestamp } from 'firebase/firestore'; // Import Firestore functions
-import { ToastContainer, toast } from 'react-toastify'; // Import toast notifications
+import { Modal, Box, Typography, Button, FormControl, InputLabel } from '@mui/material';
+import Select from 'react-select';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { db } from '../../firebaseConfig';
 
 const ApplicationModal = ({ open, handleClose, schoolUID, volunteerUID, listingUID, schoolName }) => {
     const [selectedSubjects, setSelectedSubjects] = useState([]); // State for selected subjects
 
-    const handleSubjectChange = (event) => {
-        setSelectedSubjects(event.target.value); // Update selected subjects
+    const handleSubjectsChange = (selectedOptions) => {
+        setSelectedSubjects(selectedOptions); // Update selected subjects
     };
 
     const handleSubmit = async () => {
         try {
             if (selectedSubjects.length === 0) {
-                toast.error('Please select at least one subject'); // Notify user to select at least one subject
+                toast.error('Please select at least one subject');
                 return;
             }
 
-            // Create a new application object with the provided data
+            const selectedSubjectsValues = selectedSubjects.map(option => option.value);
+
             const applicationData = {
                 schoolUID,
                 volunteerUID,
                 listingUID,
                 schoolName,
-                status: 'Pending', // Set status to pending
-                subjects: selectedSubjects, // Store the selected subjects
-                timestamp: Timestamp.now() // Add a timestamp for when the application was submitted
+                status: 'Pending',
+                subjects: selectedSubjectsValues,
+                timestamp: Timestamp.now()
             };
 
-            // Add the application to the 'applications' collection in Firestore
             const docRef = await addDoc(collection(db, 'applications'), applicationData);
 
             console.log('Application submitted with ID: ', docRef.id);
 
-            // Notify user of successful submission
             toast.success('Application submitted successfully');
-            handleClose(); // Close the modal after submission
+            handleClose();
         } catch (error) {
             console.error('Error submitting application: ', error);
-            // Notify user of error
             toast.error('Failed to submit application. Please try again later.' + error.message);
-            console.log(schoolUID);
         }
     };
 
@@ -59,41 +57,42 @@ const ApplicationModal = ({ open, handleClose, schoolUID, volunteerUID, listingU
                 p: 4,
                 width: '50%',
                 maxHeight: '80%',
-                    overflow: 'hidden',
-                    overflowY: 'auto',
+                overflow: 'hidden',
+                overflowY: 'auto',
             }}>
                 <Typography variant="h5" gutterBottom>Apply to Listing</Typography>
                 <FormControl fullWidth sx={{ marginBottom: 2 }}>
                     <InputLabel id="subject-select-label">Select Subjects</InputLabel>
                     <Select
-                        labelId="subject-select-label"
-                        id="subject-select"
-                        multiple // Enable multiple selection
+                        isMulti
+                        id="subjects"
+                        placeholder="Select Subjects"
+                        options={[
+                            { label: 'Advance Mathematics', value: 'advance mathematics' },
+                            { label: 'Basic Mathematics', value: 'basic mathematics' },
+                            { label: 'English', value: 'english' },
+                            { label: 'Physics', value: 'physics' },
+                            { label: 'Chemistry', value: 'chemistry' },
+                            { label: 'Biology', value: 'biology' },
+                            { label: 'Economics', value: 'economics' },
+                            { label: 'Geography', value: 'geography' },
+                            { label: 'Civics', value: 'civics' },
+                            { label: 'General Studies', value: 'general studies' },
+                            { label: 'History', value: 'history' },
+                            { label: 'Islamic Knowledge', value: 'islamic knowledge' },
+                            { label: 'Bible Knowledge', value: 'bible knowledge' },
+                            { label: 'Divinity', value: 'divinity' },
+                            // Add more subjects as needed
+                        ]}
                         value={selectedSubjects}
-                        onChange={handleSubjectChange}
-                        renderValue={(selected) => selected.join(', ')} // Render selected subjects as comma-separated string
-                        
-                    >
-                        <MenuItem value="Mathematics">Mathematics</MenuItem>
-                        <MenuItem value="Physics">Physics</MenuItem>
-                        <MenuItem value="Chemistry">Chemistry</MenuItem>
-                        <MenuItem value="Biology">Biology</MenuItem>
-                        <MenuItem value="English">English</MenuItem>
-                        <MenuItem value="Kiswahili">Kiswahili</MenuItem>
-                        <MenuItem value="History">History</MenuItem>
-                        <MenuItem value="Commerce">Commerce</MenuItem>
-                        <MenuItem value="Book-keeping">Book-keeping</MenuItem>
-                        <MenuItem value="Geography">Geography</MenuItem>
-                        <MenuItem value="Literature">Literature</MenuItem>
-                        <MenuItem value="Islamic Knowledge">Islamic Knowledge</MenuItem>
-                        <MenuItem value="Divinity">Divinity</MenuItem>
-                        {/* Add more subjects as needed */}
-                    </Select>
+                        onChange={handleSubjectsChange}
+                        sx={{ width: '100%', mt: 2 }}
+                    />
                 </FormControl>
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <Button variant="contained" onClick={handleSubmit}>Submit Application</Button>
                 </Box>
-                <ToastContainer /> {/* Render the toast container */}
+                <ToastContainer />
             </Box>
         </Modal>
     );

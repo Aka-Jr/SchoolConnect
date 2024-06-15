@@ -9,9 +9,12 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import ListingsManager from './ListingsManager';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
+import VolunteersCard from '../Volunteers/VolunteersCard';
+import AppliedListings from './AppliedListings';
 
 const Dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal open/close
+    const [isAppliedListModalOpen, setIsAppliedListModalOpen] = useState(false);
     const [isViewListModalOpen, setIsViewListModalOpen] = useState(false); // State to control view list modal open/close
     const [listings, setListings] = useState([]);
 
@@ -21,6 +24,14 @@ const Dashboard = () => {
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
+    };
+
+    const handleOpenAppliedListModal = () => {
+        setIsAppliedListModalOpen(true);
+    };
+
+    const handleCloseAppliedListModal = () => {
+        setIsAppliedListModalOpen(false);
     };
 
     const handleOpenViewListModal = () => {
@@ -47,7 +58,7 @@ const Dashboard = () => {
             <Box>
                 <Grid container spacing={2} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
                     {/* Card for adding listings */}
-                    <Grid item xs={3}>
+                    <Grid item xs={2}>
                         <Card sx={{ bgcolor: '#0E424C', textAlign: 'center' }}>
                             <Typography sx={{ color: 'white' }}>Add Listing</Typography>
                             <CardContent>
@@ -66,7 +77,7 @@ const Dashboard = () => {
                         </Card>
                     </Grid>
                     {/* Card for viewing listings */}
-                    <Grid item xs={3}>
+                    <Grid item xs={2}>
                         <Card sx={{ bgcolor: '#0E424C', textAlign: 'center' }}>
                             <Typography sx={{ color: 'white' }}>View Listings</Typography>
                             <CardContent>
@@ -87,12 +98,57 @@ const Dashboard = () => {
                             </CardActions>
                         </Card>
                     </Grid>
+
+                    <Grid item xs={2}>
+                        <Card sx={{ bgcolor: '#0E424C', textAlign: 'center' }}>
+                            <Typography sx={{ color: 'white' }}>Requested Volunteers</Typography>
+                            <CardContent>
+                                <IconButton sx={{ color: 'white' }}>
+                                    <ViewListIcon />
+                                </IconButton>
+                            </CardContent>
+                            <CardActions sx={{ justifyContent: 'center' }}>
+                                <Button
+                                    sx={{ color: 'white', width: '100%' }}
+                                    onClick={() => {
+                                        fetchListings();
+                                        handleOpenViewListModal();
+                                    }} // Open view list modal when button is clicked and fetch listings
+                                >
+                                    View
+                                </Button>
+                            </CardActions>
+                        </Card>
+                    </Grid>
+
+                    <Grid item xs={2}>
+                        <Card sx={{ bgcolor: '#0E424C', textAlign: 'center' }}>
+                            <Typography sx={{ color: 'white' }}>Applied Listings</Typography>
+                            <CardContent>
+                                <IconButton sx={{ color: 'white' }}>
+                                    <ViewListIcon />
+                                </IconButton>
+                            </CardContent>
+                            <CardActions sx={{ justifyContent: 'center' }}>
+                                <Button
+                                    sx={{ color: 'white', width: '100%' }}
+                                    onClick={() => setIsAppliedListModalOpen(true)} // Open view list modal when button is clicked and fetch listings
+                                >
+                                    View
+                                </Button>
+                            </CardActions>
+                        </Card>
+                    </Grid>
+                   
                 </Grid>
+                
             </Box>
             {/* Render the ListingFormModal component */}
             <ListingFormModal open={isModalOpen} handleClose={handleCloseModal} />
             {/* Render the ListingsModal component */}
             <ListingsManager open={isViewListModalOpen} handleClose={handleCloseViewListModal} listings={listings} />
+            <AppliedListings open={isAppliedListModalOpen} handleClose={() => setIsAppliedListModalOpen(false)} />
+
         </React.Fragment>
     );
 };

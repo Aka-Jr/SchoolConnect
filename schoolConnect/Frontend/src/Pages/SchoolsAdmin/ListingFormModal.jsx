@@ -14,6 +14,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db, auth } from '../../firebaseConfig';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import AppliedListings from './AppliedListings';
 
 const ListingFormModal = ({ handleClose, open,}) => {
   const [listingData, setListingData] = useState({
@@ -73,9 +74,10 @@ const ListingFormModal = ({ handleClose, open,}) => {
         schoolName: userData.schoolName,
         email: userData.email,
         genderComposition:userData.genderComposition,
-        numberOfStudent: userData.numberOfStudents,
+        numberOfStudents: userData.numberOfStudents,
         isBoarding:userData.isBoarding,
-        isReligious:userData.isReligious
+        isReligious:userData.isReligious,
+        status: 'ongoing'
       });
 
       toast.success('Listing added successfully');
@@ -99,6 +101,7 @@ const ListingFormModal = ({ handleClose, open,}) => {
   }
 
   return (
+    <React.Fragment>
     <Modal
       open={open}
       onClose={handleClose}
@@ -156,6 +159,8 @@ const ListingFormModal = ({ handleClose, open,}) => {
         <ToastContainer />
       </Box>
     </Modal>
+    
+    </React.Fragment>
   );
 };
 
