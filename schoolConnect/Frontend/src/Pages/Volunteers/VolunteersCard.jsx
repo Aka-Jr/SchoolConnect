@@ -1,8 +1,10 @@
+// VolunteersCard.jsx
+
 import React, { useState, useEffect } from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
-import VolunteerCardsModal from './VolunteerCardsModal'; // Import the VolunteerCardsModal component
+import VolunteerCardsModal from './VolunteerCardsModal';
 
 const VolunteersCard = () => {
     const [volunteers, setVolunteers] = useState([]);
@@ -11,7 +13,7 @@ const VolunteersCard = () => {
     useEffect(() => {
         const fetchVolunteers = async () => {
             try {
-                const volunteersCollection = collection(db, 'users'); // Reference to your 'users' collection in Firestore
+                const volunteersCollection = collection(db, 'users');
                 const volunteersSnapshot = await getDocs(volunteersCollection);
                 const volunteersData = volunteersSnapshot.docs.map(doc => ({
                     id: doc.id,
@@ -24,14 +26,27 @@ const VolunteersCard = () => {
                 setLoading(false);
             }
         };
+
         fetchVolunteers();
     }, []);
 
     if (loading) {
-        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>;
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <CircularProgress />
+            </Box>
+        );
     }
 
-    return <VolunteerCardsModal volunteers={volunteers} />;
+    return (
+<Box sx={{mt: 5}}>
+<Typography variant='h6' sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '2%'}}>
+    Volunteers
+</Typography>
+<VolunteerCardsModal volunteers={volunteers} />;
+</Box>
+    )
+    
 }
 
 export default VolunteersCard;

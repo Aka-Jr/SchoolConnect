@@ -78,7 +78,7 @@ const EditSchoolInfo = ({ open, handleClose, userData, updateUser }) => {
                         margin="normal"
                     />
 
-                    {/* Add more fields as needed */}
+                   
                     <Button type="submit" variant="contained" color="primary">
                         Save Changes
                     </Button>

@@ -6,6 +6,7 @@ import { auth } from '../../firebaseConfig';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Dashboard from './Dashoboard';
+import VolunteersCard from '../Volunteers/VolunteersCard';
 
 const AdminsDashboard = () => {
   const handleSignOut = async () => {
@@ -25,6 +26,7 @@ const AdminsDashboard = () => {
       <SchoolDrawer  handleSignOut={handleSignOut}/>
       <Box sx={{mt:10}}>
       <Dashboard />
+      <VolunteersCard />
       </Box>
       
     </React.Fragment>

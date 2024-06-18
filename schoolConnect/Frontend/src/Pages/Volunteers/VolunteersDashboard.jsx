@@ -10,6 +10,7 @@ import Cards from '../../Components/Cards';
 import Footer from '../../Components/Footer';
 import ApplicationModal from './ApplicationModal'; // Import the ApplicationModal component
 
+
 const VolunteersDashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false); // State to control the visibility of the modal
 
