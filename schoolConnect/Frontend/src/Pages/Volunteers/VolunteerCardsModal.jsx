@@ -112,7 +112,7 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails} ) => {
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem', width: '100%' }}>
                 {volunteers.slice(currentIndex, currentIndex + 3).map((volunteer) => (
-                    <Card key={volunteer.id} sx={{ maxWidth: 300, bgcolor: '#0E424C', height: '100%' }}>
+                    <Card key={volunteer.id} sx={{ width: 300, bgcolor: '#0E424C', height: '100%' }}>
                         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                             <CardMedia
                                 component='img'
@@ -123,7 +123,7 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails} ) => {
                             />
                         </Box>
                         <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                            <Box sx={{ flexGrow: 1 }}>
+                            <Box sx={{ flexGrow: 1, }}>
                                 <Typography gutterBottom variant='h5' sx={{ color: 'white', textAlign: 'center' }}>
                                     {volunteer.firstname} {volunteer.surname}
                                 </Typography>
@@ -142,8 +142,8 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails} ) => {
                                         {volunteer.age}
                                     </span>
                                 </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginBottom: '2%', marginTop: '2%', right: 'auto' }}>
-                                    Subjects: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>
+                                <Typography variant='body2' sx={{ color: 'white', marginBottom: '2%', marginTop: '2%', right: 'auto', height:'35px' }}>
+                                    Subjects: <span style={{ color: '#A0826A', fontWeight: 'bold', }}>
                                         {volunteer.subjects.join(', ')}
                                     </span>
                                 </Typography>
