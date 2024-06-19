@@ -16,10 +16,12 @@ import {
     ListItemButton,
     ListItemIcon,
     ListItemText,
-    Avatar
+    Avatar,
+    Badge
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import KeyIcon from '@mui/icons-material/Key';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -114,7 +116,14 @@ const VolunteerzDrawer = ({ handleSignOut }) => {
                             <MenuIcon />
                         </IconButton>
                         <Typography sx={{ color: 'white', marginRight: '0' }}>My Dashboard</Typography>
-                        <Typography sx={{ color: 'white', marginLeft: 'auto' }}>welcome, {userData ? userData.surname : ''}</Typography>
+                        <Box sx={{ color: 'white', marginLeft: 'auto', display: 'flex', gap: '10%' }}>
+                        <IconButton onClick={handleOpenModal} sx={{ color: 'white', }}>
+                        <Badge badgeContent={4} color="error">
+                            <NotificationsIcon />
+                            </Badge>
+                        </IconButton>
+                        <Typography >welcome, {userData ? userData.surname : ''}</Typography>
+                        </Box>
                     </Toolbar>
                 </AppBar>
                 <Drawer open={open} >

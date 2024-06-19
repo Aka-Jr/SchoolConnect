@@ -22,6 +22,7 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
     gender: '',
     age: '',
     maritalStatus: '',
+    availabilityStatus: 'available',
     educationLevel: '',
     certificate: null,
     certificateURL: '',
@@ -86,7 +87,7 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { firstname, surname, email, region, district, ward, password, confirmPassword, phoneNumber, gender, age, maritalStatus, educationLevel, certificate, employmentStatus, subjects } = formData;
+    const { firstname, surname, email, region, district, ward, password, confirmPassword, phoneNumber, gender, age, maritalStatus, educationLevel, certificate, employmentStatus,availabilityStatus, subjects } = formData;
 
     const validationErrors = {};
 
@@ -145,6 +146,7 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
         educationLevel,
         certificateURL,
         employmentStatus,
+        availabilityStatus,
         region,
         district,
         ward,
