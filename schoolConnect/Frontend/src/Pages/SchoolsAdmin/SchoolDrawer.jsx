@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { auth } from '../../firebaseConfig';
+import { auth, db, storage } from '../../firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import {
   Box,
   IconButton, Typography, Button, AppBar,
   Toolbar, Drawer, Divider, List, ListItem, ListItemButton,
   ListItemIcon, ListItemText,
-  Avatar
+  Avatar, TextField
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -19,22 +19,26 @@ import EditSchoolInfo from './EditSchoolInfo';
 import ListingsCard from '../../Components/ListingsCard';
 import ListingFormModal from './ListingFormModal';
 
-
-const SchoolDrawer = ({ handleSignOut}) => {
+const SchoolDrawer = ({ handleSignOut }) => {
   const [userData, setUserData] = useState(null);
   const [openModal, setOpenModal] = useState(false);
-  const [user, setUser] = useState(null); // Add user state
+  const [user, setUser] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState('');
+  const [imageUpload, setImageUpload] = useState(null);
+  const [isEditingImage, setIsEditingImage] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
       auth.onAuthStateChanged(async (user) => {
         if (user) {
-          setUser(user); // Set user state
+          setUser(user);
           try {
             const userDocRef = doc(db, 'schools', user.uid);
             const userDocSnap = await getDoc(userDocRef);
             if (userDocSnap.exists()) {
               setUserData(userDocSnap.data());
+              setProfileImage(userDocSnap.data().profileImageUrl || '');
               console.log(userDocSnap.data());
             } else {
               console.log('No such document!');
@@ -62,9 +66,46 @@ const SchoolDrawer = ({ handleSignOut}) => {
     const userDocRef = doc(db, 'schools', user.uid);
     try {
       await updateDoc(userDocRef, updatedData);
-      setUserData(updatedData); // Update state with new data
+      setUserData(updatedData); 
     } catch (error) {
       console.error('Error updating user data:', error);
+    }
+  };
+
+  const handleListItemClick = (page) => {
+    if (page === 'Edit Profile') {
+      handleOpenModal();
+    }
+  };
+
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+
+  const handleImageChange = (e) => {
+    if (e.target.files[0]) {
+      setImageUpload(e.target.files[0]);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!imageUpload) return;
+    const imageRef = ref(storage, `profilePictures/${user.uid}`);
+    try {
+      await uploadBytes(imageRef, imageUpload);
+      const imageUrl = await getDownloadURL(imageRef);
+      const userDocRef = doc(db, 'schools', user.uid);
+      await updateDoc(userDocRef, { profileImageUrl: imageUrl });
+      setProfileImage(imageUrl);
+      setIsEditingImage(false); 
+      alert('Profile image updated successfully');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Error uploading image');
     }
   };
 
@@ -75,19 +116,8 @@ const SchoolDrawer = ({ handleSignOut}) => {
     'Edit Profile': <EditIcon />,
   };
 
-  const handleListItemClick = (page) => {
-    if (page === 'Edit Profile') {
-      handleOpenModal();
-    }
-  };
-
-  const [open, setOpen] = useState(false);
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
+  const handleEditImageClick = () => {
+    setIsEditingImage(true);
   };
 
   return (
@@ -114,9 +144,29 @@ const SchoolDrawer = ({ handleSignOut}) => {
           </Box>
 
           <Divider />
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-            <Avatar src='British.png' sx={{ width: 120, height: 120 }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5, position: 'relative' }}>
+            <Avatar src={profileImage} sx={{ width: 120, height: 120 }} />
+            {!isEditingImage && (
+              <IconButton
+                sx={{ position: 'absolute', bottom: 0, right: 0 }}
+                onClick={handleEditImageClick}
+              >
+                <EditIcon />
+              </IconButton>
+            )}
           </Box>
+          {isEditingImage && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+              <input
+                accept="image/*"
+                type="file"
+                onChange={handleImageChange}
+              />
+              <Button variant="contained" onClick={handleImageUpload} sx={{ ml: 2 }}>
+                Upload
+              </Button>
+            </Box>
+          )}
           <Typography variant='subtitle' sx={{ justifyContent: 'center', display: 'flex', mt: 2 }}>{userData && userData.email}</Typography>
           <List>
             {Pages.map((page, index) => (
@@ -155,9 +205,7 @@ const SchoolDrawer = ({ handleSignOut}) => {
       <ListingFormModal 
         schoolData={userData}
       />
-       
-      
     </React.Fragment>
-  )
+  );
 }
 export default SchoolDrawer;

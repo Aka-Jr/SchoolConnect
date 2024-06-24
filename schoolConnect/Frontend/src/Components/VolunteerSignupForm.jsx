@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db, storage } from '../firebaseConfig';
 import { setDoc, doc } from "firebase/firestore";
 import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useDropzone } from 'react-dropzone';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Select from 'react-select';
@@ -130,7 +131,7 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
         await uploadBytes(storageRef, certificate, { contentType: certificate.type });
         certificateURL = await getDownloadURL(storageRef);
         setUploadStatus('Certificate uploaded successfully.'); // Update status after upload
-        toast.success(setUploadStatus);
+        // toast.success(setUploadStatus);
       }
 
       const userData = {
@@ -174,7 +175,7 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
         ward: '',
         subjects: []
       });
-
+      // toast.success(uploadStatus);
       toast.success('Registration successful!');
       setTimeout(() => {
         handleSwitchForm();
@@ -199,6 +200,7 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
   };
 
   return (
+    <React.Fragment>
     <div>
       <Box>
         <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Basic Information</Typography></Divider>
@@ -303,7 +305,7 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
         )}
 
         {uploadStatus && ( // Display upload status message
-          <Typography variant="body2" sx={{ mt: 2, color: '#0E424C' }}>
+          <Typography variant="body2" sx={{ mt: 2, color: 'green' }}>
             {uploadStatus}
           </Typography>
         )}
@@ -409,8 +411,10 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
           Register
         </Button>
       </Box>
-      <ToastContainer />
+     
     </div>
+    {/* <ToastContainer /> */}
+    </React.Fragment>
   );
 };
 

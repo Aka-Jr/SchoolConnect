@@ -11,15 +11,20 @@ import {
     Snackbar,
     Alert,
     Modal,
-    TextField
+    TextField,
+    Checkbox,
+    FormControlLabel,
+    FormControl,
+    FormLabel,
+    FormGroup
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection } from 'firebase/firestore';
 import { deepPurple } from '@mui/material/colors';
-import { auth, db } from '../../firebaseConfig'; // Ensure db is imported
+import { auth, db } from '../../firebaseConfig';
 import Autocomplete from '@mui/material/Autocomplete';
 
-const VolunteerCardsModal = ({ volunteers, schoolDetails} ) => {
+const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
@@ -28,15 +33,16 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails} ) => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [requestSubjects, setRequestSubjects] = useState([]);
+    const [accommodationAvailable, setAccommodationAvailable] = useState(false);
+    const [financialAssistance, setFinancialAssistance] = useState(false);
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
             setIsAuthenticated(!!user);
         });
 
         return unsubscribe;
     }, []);
-
 
     const handleApplyButtonClick = (volunteer) => {
         if (isAuthenticated) {
@@ -56,36 +62,51 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails} ) => {
         const selectedSubjectsText = requestSubjects.join(', ');
 
         try {
-            // Create a notification object
+            // Create a notification object with minimal fields
             const notificationData = {
                 createdAt: new Date(),
                 volunteerId: selectedVolunteer.id,
+                schoolId: schoolDetails?.uid || '',
+                message: `Hello ${selectedVolunteer.firstname}, ${schoolDetails?.schoolName} is requesting your assistance for subjects: ${selectedSubjectsText}.`
+            };
+
+            // Create a request object with the remaining data
+            const requestData = {
+                volunteerId: selectedVolunteer.id,
                 volunteerName: `${selectedVolunteer.firstname} ${selectedVolunteer.surname}`,
-                schoolName: schoolDetails?.schoolName || '', // Access school details here
+                schoolId: schoolDetails?.uid || '',
                 subjects: requestSubjects,
+                accommodationAvailable,
+                financialAssistance,
                 status: 'pending',
+                location: `${schoolDetails?.street}, ${schoolDetails?.ward}, ${schoolDetails?.district}, ${schoolDetails?.region}` || '', // Add location details
+                
             };
 
             // Store notification in Firestore
-            const docRef = await addDoc(collection(db, 'notifications'), notificationData);
-            console.log('Notification added with ID: ', docRef.id);
+            const notificationDocRef = await addDoc(collection(db, 'notifications'), notificationData);
+            console.log('Notification added with ID: ', notificationDocRef.id);
+
+            // Store request in Firestore
+            const requestDocRef = await addDoc(collection(db, 'requests'), requestData);
+            console.log('Request added with ID: ', requestDocRef.id);
 
             setSnackbarMessage(`Request sent to ${selectedVolunteer.firstname} ${selectedVolunteer.surname} for subjects: ${selectedSubjectsText}.`);
-            console.log(schoolDetails);
             setSnackbarOpen(true);
             handleCloseApplicationModal();
         } catch (error) {
-            console.error('Error storing notification:', error);
+            console.error('Error storing notification or request:', error);
             setSnackbarMessage('Failed to send request. Please try again later.');
             setSnackbarOpen(true);
         }
     };
 
-
     const handleCloseApplicationModal = () => {
         setIsApplicationModalOpen(false);
         setSelectedVolunteer(null);
         setRequestSubjects([]);
+        setAccommodationAvailable(false);
+        setFinancialAssistance(false);
     };
 
     const handleCloseLoginModal = () => {
@@ -142,7 +163,7 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails} ) => {
                                         {volunteer.age}
                                     </span>
                                 </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginBottom: '2%', marginTop: '2%', right: 'auto', height:'35px' }}>
+                                <Typography variant='body2' sx={{ color: 'white', marginBottom: '2%', marginTop: '2%', right: 'auto', height: '35px' }}>
                                     Subjects: <span style={{ color: '#A0826A', fontWeight: 'bold', }}>
                                         {volunteer.subjects.join(', ')}
                                     </span>
@@ -183,20 +204,66 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails} ) => {
                         Request Volunteer
                     </Typography>
                     <Typography variant="body1" gutterBottom>
-                        You are requesting <span style={{color: '#A0826A', fontWeight: 'bold'}}>{selectedVolunteer?.firstname} {selectedVolunteer?.surname}</span> to assist at your school.
+                        You are requesting <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{selectedVolunteer?.firstname} {selectedVolunteer?.surname}</span> to assist at your school.
                     </Typography>
                     <Autocomplete
                         multiple
                         options={selectedVolunteer ? selectedVolunteer.subjects : []}
                         value={requestSubjects}
-                        onChange={(event, newValues) => setRequestSubjects(newValues)}
-                        renderInput={(params) => <TextField {...params} label="Subjects" fullWidth />}
-                        sx={{ mt: 2 }}
+                        onChange={(event, newValue) => setRequestSubjects(newValue)}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="outlined"
+                                label="Select Subjects"
+                                placeholder="Subjects"
+                            />
+                        )}
+                        sx={{ mb: 2 }}
                     />
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                        <Button variant="contained" onClick={handleRequestSubmit}>Submit Request</Button>
-                        <Button variant="outlined" onClick={handleCloseApplicationModal}>Cancel</Button>
-                    </Box>
+                    <FormControl component="fieldset" sx={{ mb: 2 }}>
+                        <FormLabel component="legend">Accommodation</FormLabel>
+                        <FormGroup>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={accommodationAvailable}
+                                        onChange={(e) => setAccommodationAvailable(e.target.checked)}
+                                        name="accommodation"
+                                    />
+                                }
+                                label="Accommodation Available"
+                            />
+                        </FormGroup>
+                    </FormControl>
+                    <FormControl component="fieldset" sx={{ mb: 2 }}>
+                        <FormLabel component="legend">Financial Assistance</FormLabel>
+                        <FormGroup>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={financialAssistance}
+                                        onChange={(e) => setFinancialAssistance(e.target.checked)}
+                                        name="financialAssistance"
+                                    />
+                                }
+                                label="Financial Assistance Provided"
+                            />
+                        </FormGroup>
+                    </FormControl>
+                    <Button variant="contained" onClick={handleRequestSubmit} sx={{ mt: 2 }}>Submit Request</Button>
+                    <Button variant="outlined" onClick={handleCloseApplicationModal} sx={{ mt: 2, ml: 2 }}>Cancel</Button>
+                </Box>
+            </Modal>
+            <Modal open={isLoginModalOpen} onClose={handleCloseLoginModal}>
+                <Box sx={{ p: 4, bgcolor: 'background.paper', margin: 'auto', width: 400, borderRadius: 2 }}>
+                    <Typography variant="h6" gutterBottom>
+                        Please Log In
+                    </Typography>
+                    <Typography variant="body1" gutterBottom>
+                        You need to log in to request a volunteer.
+                    </Typography>
+                    <Button variant="contained" sx={{ mt: 2 }} onClick={() => { /* handle login logic here */ }}>Log In</Button>
                 </Box>
             </Modal>
             <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
@@ -206,6 +273,6 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails} ) => {
             </Snackbar>
         </Box>
     );
-}
+};
 
 export default VolunteerCardsModal;

@@ -9,6 +9,7 @@ import DashboardCards from './DashboardCards';
 import Cards from '../../Components/Cards';
 import Footer from '../../Components/Footer';
 import ApplicationModal from './ApplicationModal'; // Import the ApplicationModal component
+import VolunteerNotificationsModal from './VolunteerNotificationsModal';
 
 
 const VolunteersDashboard = () => {
@@ -39,7 +40,8 @@ const VolunteersDashboard = () => {
             <Box sx={{ mt: 10 }}>
                 <VolunteerzDrawer handleSignOut={handleSignOut}/>
                 <DashboardCards/>
-                <Typography variant="h4" sx={{ textAlign: 'center', mt: 5, mb: 2 }}>Listings</Typography>
+                
+                <Typography variant="h4" sx={{ textAlign: 'center', mt: 5, mb: 2 }}>Voluntering Opportunities</Typography>
                 <Cards/>
                 <ApplicationModal open={isModalOpen} handleClose={handleCloseModal} />
             </Box>

@@ -53,7 +53,7 @@ const VolunteerProfileModal = ({ open, handleClose }) => {
                 width: '80%',
                 borderRadius: '10px',
             }}>
-                <Typography variant="h5" gutterBottom sx={{ color: 'white', }}>Application Details</Typography>
+                <Typography variant="h5" gutterBottom sx={{ color: 'white', }}>My Details</Typography>
                 <VolunteerProfile />
             </Box>
         </Modal>

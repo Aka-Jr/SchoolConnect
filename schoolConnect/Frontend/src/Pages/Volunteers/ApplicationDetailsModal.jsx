@@ -29,8 +29,12 @@ const ApplicationModal = ({ open, handleClose }) => {
                 return '#ffc107'; // Yellow color for pending status
             case 'Accepted':
                 return '#4caf50'; // Green color for accepted status
+                case 'accepted':
+                return '#4caf50';
             case 'Rejected':
                 return '#f44336'; // Red color for rejected status
+                case 'rejected':
+                return '#f44336';
             default:
                 return 'inherit'; // Use default color
         }

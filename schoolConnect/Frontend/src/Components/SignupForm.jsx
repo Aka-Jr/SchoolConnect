@@ -15,6 +15,7 @@ const SignupForm = ({ handleSwitchForm }) => {
   };
 
   return (
+    <React.Fragment>
     <div>
       <LocalLibraryIcon />
       <Typography variant="h6">
@@ -42,8 +43,10 @@ const SignupForm = ({ handleSwitchForm }) => {
           <SchoolSignupForm handleSwitchForm={handleSwitchForm} setLoading={setLoading} />
         )}
       </Box>
-      {/* <ToastContainer /> */}
+      
     </div>
+    {/* <ToastContainer /> */}
+    </React.Fragment>
   );
 };
 

@@ -7,20 +7,21 @@ import {
   FormControlLabel,
   Modal,
   TextField,
-  Typography,
 } from '@mui/material';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { doc, getDoc } from 'firebase/firestore';
 import { db, auth } from '../../firebaseConfig';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import AppliedListings from './AppliedListings';
+import 'react-datepicker/dist/react-datepicker.css';
+import DatePicker from 'react-datepicker';
 
-const ListingFormModal = ({ handleClose, open,}) => {
+const ListingFormModal = ({ handleClose, open }) => {
   const [listingData, setListingData] = useState({
     description: '',
     numberOfWeeks: '',
     willProvideAccommodation: false,
+    deadline: null, // Add deadline field
   });
 
   const [userData, setUserData] = useState(null);
@@ -54,10 +55,19 @@ const ListingFormModal = ({ handleClose, open,}) => {
     setListingData({ ...listingData, [name]: checked });
   };
 
+  const handleDateChange = (date) => {
+    setListingData({ ...listingData, deadline: date });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (listingData.numberOfWeeks <= 0) {
       toast.error('Number of weeks must be greater than 0');
+      return;
+    }
+
+    if (!listingData.deadline || listingData.deadline < new Date()) {
+      toast.error('Please select a valid future deadline');
       return;
     }
 
@@ -68,16 +78,16 @@ const ListingFormModal = ({ handleClose, open,}) => {
         timestamp: serverTimestamp(),
         uid: auth.currentUser.uid,
         location: `${userData.ward}, ${userData.district}, ${userData.region}`,
-        region:userData.region,
+        region: userData.region,
         district: userData.district,
-        ward:userData.ward,
+        ward: userData.ward,
         schoolName: userData.schoolName,
         email: userData.email,
-        genderComposition:userData.genderComposition,
+        genderComposition: userData.genderComposition,
         numberOfStudents: userData.numberOfStudents,
-        isBoarding:userData.isBoarding,
-        isReligious:userData.isReligious,
-        status: 'ongoing'
+        isBoarding: userData.isBoarding,
+        isReligious: userData.isReligious,
+        status: 'ongoing',
       });
 
       toast.success('Listing added successfully');
@@ -87,6 +97,7 @@ const ListingFormModal = ({ handleClose, open,}) => {
         description: '',
         numberOfWeeks: '',
         willProvideAccommodation: false,
+        deadline: null,
       });
 
       handleClose();
@@ -102,64 +113,77 @@ const ListingFormModal = ({ handleClose, open,}) => {
 
   return (
     <React.Fragment>
-    <Modal
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="listing-form-modal"
-      aria-describedby="listing-form-modal-description"
-    >
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 400,
-          bgcolor: 'background.paper',
-          boxShadow: 24,
-          p: 2,
-        }}
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="listing-form-modal"
+        aria-describedby="listing-form-modal-description"
       >
-        <form onSubmit={handleSubmit}>
-          <TextField
-            name="description"
-            label="Description"
-            placeholder="eg.In need of 6 teachers of Physics and Chemistry"
-            value={listingData.description}
-            onChange={handleInputChange}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            name="numberOfWeeks"
-            type="number"
-            label="Number of Weeks"
-            value={listingData.numberOfWeeks}
-            onChange={handleInputChange}
-            fullWidth
-            margin="normal"
-          />
-          <FormControl sx={{ mt: 1 }} fullWidth>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="willProvideAccommodation"
-                  checked={listingData.willProvideAccommodation}
-                  onChange={handleCheckboxChange}
-                />
-              }
-              label="Will Provide Accommodation"
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 2,
+          }}
+        >
+          <form onSubmit={handleSubmit}>
+            <TextField
+              name="description"
+              label="Description"
+              placeholder="eg. In need of 6 teachers of Physics and Chemistry"
+              value={listingData.description}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
             />
-          </FormControl>
-         
-          <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
-            Submit
-          </Button>
-        </form>
-        <ToastContainer />
-      </Box>
-    </Modal>
-    
+            <TextField
+              name="numberOfWeeks"
+              type="number"
+              label="Number of Weeks"
+              value={listingData.numberOfWeeks}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+            />
+            {/* Integrate Date Picker */}
+            <DatePicker
+              selected={listingData.deadline}
+              onChange={handleDateChange}
+              placeholderText="Select a deadline"
+              minDate={new Date()}
+              customInput={<TextField fullWidth margin="normal" />}
+            />
+
+            <FormControl sx={{ mt: 1 }} fullWidth>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="willProvideAccommodation"
+                    checked={listingData.willProvideAccommodation}
+                    onChange={handleCheckboxChange}
+                  />
+                }
+                label="Will Provide Accommodation"
+              />
+            </FormControl>
+
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+            >
+              Submit
+            </Button>
+          </form>
+        </Box>
+      </Modal>
+      <ToastContainer />
     </React.Fragment>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { auth } from '../../firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
+import { getGreetingMessage } from '../../Components/Greetings';
 import {
     Box,
     IconButton,
@@ -32,6 +33,8 @@ import VolunteerCardsModal from './VolunteerCardsModal';
 const VolunteerzDrawer = ({ handleSignOut }) => {
     const [userData, setUserData] = useState(null);
     const [openModal, setOpenModal] = useState(false);
+
+    const { message, icon, color } = getGreetingMessage();
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -117,12 +120,18 @@ const VolunteerzDrawer = ({ handleSignOut }) => {
                         </IconButton>
                         <Typography sx={{ color: 'white', marginRight: '0' }}>My Dashboard</Typography>
                         <Box sx={{ color: 'white', marginLeft: 'auto', display: 'flex', gap: '10%' }}>
-                        <IconButton onClick={handleOpenModal} sx={{ color: 'white', }}>
-                        <Badge badgeContent={4} color="error">
-                            <NotificationsIcon />
-                            </Badge>
-                        </IconButton>
-                        <Typography >welcome, {userData ? userData.surname : ''}</Typography>
+                            <IconButton sx={{ color: 'white', }}>
+                                <Badge badgeContent={4} color="error">
+                                    <NotificationsIcon />
+                                </Badge>
+                            </IconButton>
+
+                            <Typography variant="body2">
+                                <IconButton>
+                                    {icon}
+                                </IconButton>
+                                {message}, {userData ? userData.firstname : ''}!
+                            </Typography>
                         </Box>
                     </Toolbar>
                 </AppBar>
@@ -184,7 +193,7 @@ const VolunteerzDrawer = ({ handleSignOut }) => {
                 updateUser={updateUser}
             />
 
-        
+
 
         </React.Fragment>
     )

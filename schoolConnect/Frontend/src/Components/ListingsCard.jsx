@@ -1,48 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Card, CardActions, CardContent, CardMedia, Button, Typography, IconButton } from '@mui/material';
-import AccessAlarmIcon from '@mui/icons-material/AccessAlarm';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import EventIcon from '@mui/icons-material/Event';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ApplicationModal from '../Pages/Volunteers/ApplicationModal';
-import ModalComponent from './ModalComponent'; // Import the ModalComponent for login/sign up
+import ModalComponent from './ModalComponent';
 import { deepPurple } from '@mui/material/colors';
-import { auth } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import { format } from 'date-fns';
 
 const ListingsCard = ({ listings }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
-    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // State for login modal
-    const [selectedListingId, setSelectedListingId] = useState(null); // State for selected listing ID
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [selectedListingId, setSelectedListingId] = useState(null);
+    const [schoolLogos, setSchoolLogos] = useState({});
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
-                setIsAuthenticated(true); // Set isAuthenticated to true if a user is logged in
+                setIsAuthenticated(true);
             } else {
-                setIsAuthenticated(false); // Set isAuthenticated to false if no user is logged in
+                setIsAuthenticated(false);
             }
         });
 
-        // Clean up the listener when the component unmounts
         return unsubscribe;
     }, []);
 
+    useEffect(() => {
+        const fetchSchoolLogos = async () => {
+            const logos = {};
+            for (const listing of listings) {
+                if (listing.uid) {
+                    const schoolDocRef = doc(db, 'schools', listing.uid);
+                    const schoolDocSnap = await getDoc(schoolDocRef);
+                    if (schoolDocSnap.exists()) {
+                        logos[listing.uid] = schoolDocSnap.data().profileImageUrl;
+                    }
+                }
+            }
+            setSchoolLogos(logos);
+        };
+
+        fetchSchoolLogos();
+    }, [listings]);
+
     const handleApplyButtonClick = (listingId) => {
         if (isAuthenticated) {
-            setIsApplicationModalOpen(true); // Open the application modal if the user is authenticated
-            setSelectedListingId(listingId); // Set the selected listing ID
+            setIsApplicationModalOpen(true);
+            setSelectedListingId(listingId);
         } else {
-            setIsLoginModalOpen(true); // Open the login/sign up modal if the user is not authenticated
+            setIsLoginModalOpen(true);
         }
     };
 
     const handleCloseApplicationModal = () => {
-        setIsApplicationModalOpen(false); // Close the application modal
-        setSelectedListingId(null); // Reset the selected listing ID
+        setIsApplicationModalOpen(false);
+        setSelectedListingId(null);
     };
 
     const handleCloseLoginModal = () => {
-        setIsLoginModalOpen(false); // Close the login/sign up modal
+        setIsLoginModalOpen(false);
     };
 
     const handleNextClick = () => {
@@ -53,7 +74,6 @@ const ListingsCard = ({ listings }) => {
         setCurrentIndex(currentIndex - 1);
     };
 
-    // Filter listings to show only those with status 'ongoing'
     const filteredListings = listings.filter(listing => listing.status === 'ongoing');
 
     return (
@@ -66,7 +86,7 @@ const ListingsCard = ({ listings }) => {
                                 component='img'
                                 alt='school logo'
                                 height='140'
-                                image={listing.logo}
+                                image={schoolLogos[listing.uid] || ''}
                                 sx={{ height: '100px', width: '100px', borderRadius: '50%', bgcolor: deepPurple[500] }}
                             />
                         </Box>
@@ -79,16 +99,19 @@ const ListingsCard = ({ listings }) => {
                                     {listing.description}
                                 </Typography>
                                 <Typography variant='body2' sx={{ color: 'white', marginBottom: '2%', marginTop: '2%', right: 'auto' }}>
-                                    Gender Composition: <span style={{ color: '#A0826A', fontWeight: 'bold', }}>{listing.genderComposition}</span>
+                                    Gender Composition: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{listing.genderComposition}</span>
                                 </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginBottom: '2%', marginTop: '2', right: 'auto' }}>
-                                    Number of Students: <span style={{ color: '#A0826A', fontWeight: 'bold', }}>{listing.numberOfStudents}</span>
+                                <Typography variant='body2' sx={{ color: 'white', marginBottom: '2%', marginTop: '2%', right: 'auto' }}>
+                                    Number of Students: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{listing.numberOfStudents}</span>
                                 </Typography>
                                 <Typography variant='body2' sx={{ color: 'white', marginTop: '2%', right: 'auto' }}>
                                     Boarding Status: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{listing.isBoarding === 'No' ? 'Not boarding' : 'Boarding'}</span>
                                 </Typography>
                                 <Typography variant='body2' sx={{ color: 'white', marginTop: '2%', right: 'auto' }}>
                                     Religious Status: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{listing.isReligious !== 'yes' ? 'Not religious' : 'Religious'}</span>
+                                </Typography>
+                                <Typography variant='body2' sx={{ color: 'white', marginTop: '2%', right: 'auto' }}>
+                                    Accommodation: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{listing.willProvideAccommodation ? 'Will provide accommodation' : 'Will not provide accommodation'}</span>
                                 </Typography>
                             </Box>
                         </CardContent>
@@ -98,8 +121,18 @@ const ListingsCard = ({ listings }) => {
                                 <Typography variant='subtitle'>{listing.location}</Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small' }}>
-                                <IconButton sx={{ color: 'white' }}><AccessAlarmIcon /></IconButton>
-                                <Typography variant='subtitle'>{listing.numberOfWeeks === 1 ? `${listing.numberOfWeeks} Week` : `${listing.numberOfWeeks} Weeks`}</Typography>
+                                <IconButton sx={{ color: 'white' }}><AccessTimeIcon /></IconButton>
+                                <Typography variant='subtitle'>
+                                    {listing.numberOfWeeks === 1 ? `${listing.numberOfWeeks} Week` : `${listing.numberOfWeeks} Weeks`}
+                                </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small' }}>
+                                <IconButton sx={{ color: 'white' }}><EventIcon /></IconButton>
+                                {listing.deadline && (
+                                    <Typography variant='subtitle'>
+                                        Deadline: {format(listing.deadline.toDate(), 'MMMM d, yyyy h:mm a')}
+                                    </Typography>
+                                )}
                             </Box>
                         </CardContent>
                         <CardActions sx={{ justifyContent: 'center' }}>
@@ -118,9 +151,9 @@ const ListingsCard = ({ listings }) => {
                 schoolUID={filteredListings.find(listing => listing.id === selectedListingId)?.uid}
                 schoolName={filteredListings.find(listing => listing.id === selectedListingId)?.schoolName}
                 volunteerUID={auth.currentUser?.uid}
-                listingUID={selectedListingId} // Pass the selected listing ID
-            /> {/* Render the ApplicationModal */}
-            <ModalComponent open={isLoginModalOpen} handleClose={handleCloseLoginModal} formType='login' /> {/* Render the login/sign up modal */}
+                listingUID={selectedListingId}
+            />
+            <ModalComponent open={isLoginModalOpen} handleClose={handleCloseLoginModal} formType='login' />
         </Box>
     );
 }

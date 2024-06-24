@@ -34,12 +34,7 @@ const DashboardCards = () => {
         <React.Fragment>
             <Box>
                 <Grid container spacing={2} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
-                    <Grid item xs={3}>
-                        <Card sx={{ bgcolor: '#0E424C', textAlign: 'center' }}>
-                            <Typography sx={{ color: 'white' }}>Schools Volunteered</Typography>
-                            {/* Content for Schools Volunteered */}
-                        </Card>
-                    </Grid>
+                  
                     <Grid item xs={3}>
                         <Card sx={{ bgcolor: '#0E424C', textAlign: 'center' }}>
                             <Typography sx={{ color: 'white' }}>Submitted Applications</Typography>

@@ -3,6 +3,7 @@ import { Modal, Typography, Box, Button } from '@mui/material';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ModalComponent = ({ open, handleClose, formType, handleSwitchForm }) => {
     return (
@@ -57,6 +58,7 @@ const ModalComponent = ({ open, handleClose, formType, handleSwitchForm }) => {
                 </Box>
             </Box>
         </Modal>
+         <ToastContainer />
         </div>
     );
 }

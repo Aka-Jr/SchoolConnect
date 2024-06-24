@@ -156,10 +156,10 @@ const LoginForm = ({ handleClose }) => {
       </Box>
       <Button variant='contained' sx={{ width: '100%', bgcolor: '#A0826A' }} onClick={handleSubmit}>Login</Button>
 
-      <Divider sx={{mt:2}}>OR</Divider>
+      {/* <Divider sx={{mt:2}}>OR</Divider>
       <Button variant='contained' onClick={signInWithGoogle} sx={{ width: '100%', mt: 2, color: 'white', gap: '2%' }}>
         <GoogleIcon /> Sign in With Google
-      </Button>
+      </Button> */}
 
       <Box sx={{ mt: 2 }}>
         <Button onClick={handleForgotPassword} sx={{ color: '#1769aa' }}>Forgot Password?</Button>
