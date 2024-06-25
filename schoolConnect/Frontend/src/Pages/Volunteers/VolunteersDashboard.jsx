@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography} from '@mui/material';
+import { Box, Typography,Container } from '@mui/material';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
 import { ToastContainer, toast } from 'react-toastify';
@@ -37,15 +37,21 @@ const VolunteersDashboard = () => {
 
     return (
         <React.Fragment>
-            <Box sx={{ mt: 10 }}>
-                <VolunteerzDrawer handleSignOut={handleSignOut}/>
-                <DashboardCards/>
+            <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                <Container component="main" sx={{ flex: '1 0 auto' }}>
+                    <Box sx={{ mt: 10 }}>
+                        <VolunteerzDrawer handleSignOut={handleSignOut} />
+                        <DashboardCards />
+
+                        <Typography variant="h4" sx={{ textAlign: 'center', mt: 5, mb: 2 }}>Voluntering Opportunities</Typography>
+                        <Cards />
+                        <ApplicationModal open={isModalOpen} handleClose={handleCloseModal} />
+                    </Box>
+                </Container>
+
+                <Footer />
                 
-                <Typography variant="h4" sx={{ textAlign: 'center', mt: 5, mb: 2 }}>Voluntering Opportunities</Typography>
-                <Cards/>
-                <ApplicationModal open={isModalOpen} handleClose={handleCloseModal} />
             </Box>
-            <Footer />
             <ToastContainer />
         </React.Fragment>
     );

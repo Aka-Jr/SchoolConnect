@@ -86,6 +86,7 @@ const AppliedListings = ({ open, handleClose }) => {
 
       const notificationData = {
         createdAt: new Date(),
+        type: 'application',
         volunteerId,
         schoolId,
         message: notificationMessage,

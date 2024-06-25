@@ -19,7 +19,7 @@ import {
     FormGroup
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { deepPurple } from '@mui/material/colors';
 import { auth, db } from '../../firebaseConfig';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -35,6 +35,7 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
     const [requestSubjects, setRequestSubjects] = useState([]);
     const [accommodationAvailable, setAccommodationAvailable] = useState(false);
     const [financialAssistance, setFinancialAssistance] = useState(false);
+    const [numberOfWeeks, setNumberOfWeeks] = useState(1);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -62,9 +63,21 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
         const selectedSubjectsText = requestSubjects.join(', ');
 
         try {
+            // Check if there's already a request from the same school for the selected volunteer
+            const requestsRef = collection(db, 'requests');
+            const q = query(requestsRef, where('schoolId', '==', schoolDetails?.uid), where('volunteerId', '==', selectedVolunteer.id));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                setSnackbarMessage('You have already sent a request to this volunteer.');
+                setSnackbarOpen(true);
+                return;
+            }
+
             // Create a notification object with minimal fields
             const notificationData = {
                 createdAt: new Date(),
+                type: 'request',
                 volunteerId: selectedVolunteer.id,
                 schoolId: schoolDetails?.uid || '',
                 message: `Hello ${selectedVolunteer.firstname}, ${schoolDetails?.schoolName} is requesting your assistance for subjects: ${selectedSubjectsText}.`
@@ -80,7 +93,7 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
                 financialAssistance,
                 status: 'pending',
                 location: `${schoolDetails?.street}, ${schoolDetails?.ward}, ${schoolDetails?.district}, ${schoolDetails?.region}` || '', // Add location details
-                
+                numberOfWeeks // Add number of weeks
             };
 
             // Store notification in Firestore
@@ -107,6 +120,7 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
         setRequestSubjects([]);
         setAccommodationAvailable(false);
         setFinancialAssistance(false);
+        setNumberOfWeeks(1);
     };
 
     const handleCloseLoginModal = () => {
@@ -251,10 +265,21 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
                             />
                         </FormGroup>
                     </FormControl>
+                    <TextField
+                        label="Number of Weeks"
+                        type="number"
+                        value={numberOfWeeks}
+                        onChange={(e) => setNumberOfWeeks(e.target.value)}
+                        InputProps={{ inputProps: { min: 1 } }}
+                        variant="outlined"
+                        fullWidth
+                        sx={{ mb: 2 }}
+                    />
                     <Button variant="contained" onClick={handleRequestSubmit} sx={{ mt: 2 }}>Submit Request</Button>
                     <Button variant="outlined" onClick={handleCloseApplicationModal} sx={{ mt: 2, ml: 2 }}>Cancel</Button>
                 </Box>
             </Modal>
+
             <Modal open={isLoginModalOpen} onClose={handleCloseLoginModal}>
                 <Box sx={{ p: 4, bgcolor: 'background.paper', margin: 'auto', width: 400, borderRadius: 2 }}>
                     <Typography variant="h6" gutterBottom>

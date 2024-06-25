@@ -7,8 +7,9 @@ import ApplicationModal from '../Pages/Volunteers/ApplicationModal';
 import ModalComponent from './ModalComponent';
 import { deepPurple } from '@mui/material/colors';
 import { auth, db } from '../firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import { format } from 'date-fns';
+import NotificationPopup from './NotificationPopup';
 
 const ListingsCard = ({ listings }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -17,6 +18,7 @@ const ListingsCard = ({ listings }) => {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [selectedListingId, setSelectedListingId] = useState(null);
     const [schoolLogos, setSchoolLogos] = useState({});
+    const [showAlreadyAppliedPopup, setShowAlreadyAppliedPopup] = useState(false);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -48,18 +50,42 @@ const ListingsCard = ({ listings }) => {
         fetchSchoolLogos();
     }, [listings]);
 
-    const handleApplyButtonClick = (listingId) => {
+    const handleApplyButtonClick = async (listingId) => {
         if (isAuthenticated) {
-            setIsApplicationModalOpen(true);
-            setSelectedListingId(listingId);
+            // Check if the volunteer has already applied to this school listing
+            try {
+                const applicationsRef = collection(db, 'applications');
+                
+                // Check if there is an existing application for this listing by this volunteer
+                const existingApplicationQuery = query(applicationsRef, 
+                    where('listingUID', '==', listingId),
+                    where('volunteerUID', '==', auth.currentUser.uid)
+                );
+    
+                const existingApplicationSnapshot = await getDocs(existingApplicationQuery);
+                if (!existingApplicationSnapshot.empty) {
+                    setShowAlreadyAppliedPopup(true);
+                    return;
+                }
+    
+                setIsApplicationModalOpen(true);
+                setSelectedListingId(listingId);
+            } catch (error) {
+                console.error('Error checking existing application:', error);
+            }
         } else {
             setIsLoginModalOpen(true);
         }
     };
+    
 
     const handleCloseApplicationModal = () => {
         setIsApplicationModalOpen(false);
         setSelectedListingId(null);
+    };
+
+    const handleCloseAlreadyAppliedPopup = () => {
+        setShowAlreadyAppliedPopup(false); // Close notification popup
     };
 
     const handleCloseLoginModal = () => {
@@ -154,6 +180,8 @@ const ListingsCard = ({ listings }) => {
                 listingUID={selectedListingId}
             />
             <ModalComponent open={isLoginModalOpen} handleClose={handleCloseLoginModal} formType='login' />
+            <NotificationPopup open={showAlreadyAppliedPopup} handleClose={handleCloseAlreadyAppliedPopup} />
+
         </Box>
     );
 }
