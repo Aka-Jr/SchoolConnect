@@ -15,7 +15,8 @@ import {
     DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle
+    DialogTitle,
+    Tooltip
 } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
@@ -110,19 +111,27 @@ const VolunteerNotificationsModal = ({
                                                 <Button variant="outlined" onClick={() => handleReject(notification)}>Reject</Button>
                                             )}
                                             {notification.type === 'request' && (
-                                                <IconButton color="primary" onClick={() => handleMarkAsRead(notification)}>
+                                                <Tooltip title={notification.read ? 'Already marked as read' : 'Mark as read'}><IconButton color="primary" onClick={() => handleMarkAsRead(notification)}>
                                                     {notification.read ? <CheckCircleOutlineIcon /> : <HighlightOffIcon />}
                                                 </IconButton>
+                                                </Tooltip>
+                                                
                                             )}
                                             {notification.type !== 'request' && (
+                                                <Tooltip title={notification.read ? 'Already marked as read' : 'Mark as read'} >
                                                 <IconButton color="primary" onClick={() => handleMarkAsRead(notification)}>
                                                     {notification.read ? <CheckCircleOutlineIcon /> : <HighlightOffIcon />}
                                                 </IconButton>
+                                                </Tooltip>
+                                                
                                             )}
                                             <Button variant="text" onClick={() => handleNotificationClick(notification)}>View Details</Button>
+                                            <Tooltip title="Delete notification">
                                             <IconButton color="secondary" onClick={() => openDeleteConfirm(notification)}>
                                                 <DeleteIcon />
                                             </IconButton>
+                                            </Tooltip>
+                                            
                                         </TableCell>
                                     </TableRow>
                                 ))}

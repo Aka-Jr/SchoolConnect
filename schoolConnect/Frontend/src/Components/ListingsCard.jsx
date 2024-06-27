@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Card, CardActions, CardContent, CardMedia, Button, Typography, IconButton } from '@mui/material';
+import { Box, Card, CardActions, CardContent, CardMedia, Button, Typography, IconButton, Modal } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import EventIcon from '@mui/icons-material/Event';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -19,6 +19,8 @@ const ListingsCard = ({ listings }) => {
     const [selectedListingId, setSelectedListingId] = useState(null);
     const [schoolLogos, setSchoolLogos] = useState({});
     const [showAlreadyAppliedPopup, setShowAlreadyAppliedPopup] = useState(false);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [selectedListingDetails, setSelectedListingDetails] = useState(null);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -52,22 +54,19 @@ const ListingsCard = ({ listings }) => {
 
     const handleApplyButtonClick = async (listingId) => {
         if (isAuthenticated) {
-            // Check if the volunteer has already applied to this school listing
             try {
                 const applicationsRef = collection(db, 'applications');
-                
-                // Check if there is an existing application for this listing by this volunteer
-                const existingApplicationQuery = query(applicationsRef, 
+                const existingApplicationQuery = query(applicationsRef,
                     where('listingUID', '==', listingId),
                     where('volunteerUID', '==', auth.currentUser.uid)
                 );
-    
+
                 const existingApplicationSnapshot = await getDocs(existingApplicationQuery);
                 if (!existingApplicationSnapshot.empty) {
                     setShowAlreadyAppliedPopup(true);
                     return;
                 }
-    
+
                 setIsApplicationModalOpen(true);
                 setSelectedListingId(listingId);
             } catch (error) {
@@ -77,7 +76,6 @@ const ListingsCard = ({ listings }) => {
             setIsLoginModalOpen(true);
         }
     };
-    
 
     const handleCloseApplicationModal = () => {
         setIsApplicationModalOpen(false);
@@ -85,7 +83,7 @@ const ListingsCard = ({ listings }) => {
     };
 
     const handleCloseAlreadyAppliedPopup = () => {
-        setShowAlreadyAppliedPopup(false); // Close notification popup
+        setShowAlreadyAppliedPopup(false);
     };
 
     const handleCloseLoginModal = () => {
@@ -100,13 +98,24 @@ const ListingsCard = ({ listings }) => {
         setCurrentIndex(currentIndex - 1);
     };
 
+    const handleViewDetailsClick = (listingId) => {
+        const listingDetails = listings.find(listing => listing.id === listingId);
+        setSelectedListingDetails(listingDetails);
+        setIsDetailsModalOpen(true);
+    };
+
+    const handleCloseDetailsModal = () => {
+        setIsDetailsModalOpen(false);
+        setSelectedListingDetails(null);
+    };
+
     const filteredListings = listings.filter(listing => listing.status === 'ongoing');
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem', width: '100%' }}>
                 {filteredListings.slice(currentIndex, currentIndex + 3).map((listing) => (
-                    <Card key={listing.id} sx={{ maxWidth: 300, bgcolor: '#0E424C', height: '100%' }}>
+                    <Card key={listing.id} sx={{ maxWidth: 300, bgcolor: '#0E424C', display: 'flex', flexDirection: 'column' }}>
                         <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '3%' }}>
                             <CardMedia
                                 component='img'
@@ -116,53 +125,39 @@ const ListingsCard = ({ listings }) => {
                                 sx={{ height: '100px', width: '100px', borderRadius: '50%', bgcolor: deepPurple[500] }}
                             />
                         </Box>
-                        <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                            <Box sx={{ flexGrow: 1 }}>
-                                <Typography gutterBottom variant='h5' sx={{ color: 'white', textAlign: 'center' }}>
+                        <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Box sx={{ textAlign: 'center', flexGrow: 1 }}>
+                                <Typography gutterBottom variant='h5' sx={{ color: 'white' }}>
                                     {listing.schoolName}
                                 </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', height: '50px', textAlign: 'center', marginBottom: '5%', marginTop: '5%' }}>
+                                <Typography variant='body2' sx={{ color: 'white', height: '50px', marginBottom: '5%', marginTop: '5%' }}>
                                     {listing.description}
                                 </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginBottom: '2%', marginTop: '2%', right: 'auto' }}>
-                                    Gender Composition: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{listing.genderComposition}</span>
-                                </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginBottom: '2%', marginTop: '2%', right: 'auto' }}>
-                                    Number of Students: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{listing.numberOfStudents}</span>
-                                </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginTop: '2%', right: 'auto' }}>
-                                    Boarding Status: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{listing.isBoarding === 'No' ? 'Not boarding' : 'Boarding'}</span>
-                                </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginTop: '2%', right: 'auto' }}>
-                                    Religious Status: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{listing.isReligious !== 'yes' ? 'Not religious' : 'Religious'}</span>
-                                </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginTop: '2%', right: 'auto' }}>
-                                    Accommodation: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{listing.willProvideAccommodation ? 'Will provide accommodation' : 'Will not provide accommodation'}</span>
-                                </Typography>
                             </Box>
-                        </CardContent>
-                        <CardContent>
-                            <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small' }}>
-                                <IconButton sx={{ color: 'white' }}><LocationOnIcon /></IconButton>
-                                <Typography variant='subtitle'>{listing.location}</Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small' }}>
-                                <IconButton sx={{ color: 'white' }}><AccessTimeIcon /></IconButton>
-                                <Typography variant='subtitle'>
-                                    {listing.numberOfWeeks === 1 ? `${listing.numberOfWeeks} Week` : `${listing.numberOfWeeks} Weeks`}
-                                </Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small' }}>
-                                <IconButton sx={{ color: 'white' }}><EventIcon /></IconButton>
-                                {listing.deadline && (
-                                    <Typography variant='subtitle'>
-                                        Deadline: {format(listing.deadline.toDate(), 'MMMM d, yyyy h:mm a')}
+                            <Box sx={{ width: '100%' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small', }}>
+                                    <LocationOnIcon sx={{ marginRight: 1 }} />
+                                    <Typography variant='subtitle' sx={{ textAlign: 'center' }}>{listing.location}</Typography>
+                                </Box>
+                                <Box sx={{ display:'flex', alignItems: 'center',color: 'white', fontSize: 'small',  marginTop: 1 }}>
+                                    <AccessTimeIcon sx={{ marginRight: 1 }} />
+                                    <Typography variant='subtitle' sx={{ textAlign: 'center' }}>
+                                        {listing.numberOfWeeks === 1 ? `${listing.numberOfWeeks} Week` : `${listing.numberOfWeeks} Weeks`}
                                     </Typography>
-                                )}
+                                </Box>
+                                <Box sx={{ display: 'flex', color: 'white', fontSize: 'small', alignItems: 'center', marginTop: 1,}}>
+                                    <EventIcon sx={{ marginRight: 1 }} />
+                                    {listing.deadline && (
+                                        <Typography variant='subtitle' sx={{ textAlign: 'center' }}>
+                                            Deadline: {format(listing.deadline.toDate(), 'MMMM d, yyyy h:mm a')}
+                                        </Typography>
+                                    )}
+                                </Box>
                             </Box>
                         </CardContent>
                         <CardActions sx={{ justifyContent: 'center' }}>
                             <Button variant='contained' sx={{ textAlign: 'center', width: '100%', bgcolor: '#A0826A' }} onClick={() => handleApplyButtonClick(listing.id)}>Apply</Button>
+                            <Button variant='outlined' sx={{ textAlign: 'center', width: '100%', color: 'white', borderColor: 'white', marginTop: 1 }} onClick={() => handleViewDetailsClick(listing.id)}>View School Details</Button>
                         </CardActions>
                     </Card>
                 ))}
@@ -181,7 +176,36 @@ const ListingsCard = ({ listings }) => {
             />
             <ModalComponent open={isLoginModalOpen} handleClose={handleCloseLoginModal} formType='login' />
             <NotificationPopup open={showAlreadyAppliedPopup} handleClose={handleCloseAlreadyAppliedPopup} />
-
+            
+            <Modal open={isDetailsModalOpen} onClose={handleCloseDetailsModal}>
+                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 4, maxWidth: 600, width: '100%' }}>
+                    {selectedListingDetails && (
+                        <>
+                            <Typography variant='h5' gutterBottom>{selectedListingDetails.schoolName}</Typography>
+                            <Typography variant='body2' gutterBottom>Description: {selectedListingDetails.description}</Typography>
+                            <Typography variant='body2' gutterBottom>Gender Composition: {selectedListingDetails.genderComposition}</Typography>
+                            <Typography variant='body2' gutterBottom>Number of Students: {selectedListingDetails.numberOfStudents}</Typography>
+                            <Typography variant='body2' gutterBottom>Boarding Status: {selectedListingDetails.isBoarding === 'No' ? 'Not boarding' : 'Boarding'}</Typography>
+                            <Typography variant='body2' gutterBottom>Religious Status: {selectedListingDetails.isReligious !== 'Yes' ? 'Not religious' : 'Religious'}</Typography>
+                            <Typography variant='body2' gutterBottom>Accommodation: {selectedListingDetails.willProvideAccommodation ? 'Will provide accommodation' : 'Will not provide accommodation'}</Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', fontSize: 'small', marginTop: 2 }}>
+                                <LocationOnIcon sx={{ marginRight: 1 }} />
+                                <Typography variant='subtitle'>{selectedListingDetails.location}</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', fontSize: 'small', marginTop: 1 }}>
+                                <AccessTimeIcon sx={{ marginRight: 1 }} />
+                                <Typography variant='subtitle'>{selectedListingDetails.numberOfWeeks === 1 ? `${selectedListingDetails.numberOfWeeks} Week` : `${selectedListingDetails.numberOfWeeks} Weeks`}</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', fontSize: 'small', marginTop: 1, left: 'auto' }}>
+                                <EventIcon sx={{ marginRight: 1 }} />
+                                {selectedListingDetails.deadline && (
+                                    <Typography variant='subtitle'>Deadline: {format(selectedListingDetails.deadline.toDate(), 'MMMM d, yyyy h:mm a')}</Typography>
+                                )}
+                            </Box>
+                        </>
+                    )}
+                </Box>
+            </Modal>
         </Box>
     );
 }

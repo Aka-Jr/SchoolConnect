@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Input, Typography, Box, Grid, FormControl, RadioGroup, FormControlLabel, Radio, MenuItem, Select as MUISelect, Divider, IconButton } from '@mui/material';
+import { Button, Input, Typography, Box, Grid, FormControl, RadioGroup, FormControlLabel, Radio, MenuItem, Select as MUISelect, Divider, IconButton, Checkbox } from '@mui/material';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db, storage } from '../firebaseConfig';
 import { setDoc, doc } from "firebase/firestore";
@@ -31,7 +31,8 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
     region: '',
     district: '',
     ward: '',
-    subjects: []
+    subjects: [],
+    termsAccepted: false
   });
 
   const [districts, setDistricts] = useState([]);
@@ -77,6 +78,12 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
     }
   };
 
+  const handleCheck = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
+  };
+  
+
   const handleSelectChange = (id, option) => {
     setFormData(prevFormData => ({ ...prevFormData, [id]: option.value }));
   };
@@ -88,7 +95,7 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { firstname, surname, email, region, district, ward, password, confirmPassword, phoneNumber, gender, age, maritalStatus, educationLevel, certificate, employmentStatus,availabilityStatus, subjects } = formData;
+    const { firstname, surname, email, region, district, ward, password, confirmPassword, phoneNumber, gender, age, maritalStatus, educationLevel, certificate, employmentStatus,availabilityStatus, subjects, termsAccepted } = formData;
 
     const validationErrors = {};
 
@@ -112,6 +119,23 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
     }
     if (password !== confirmPassword) validationErrors.confirmPassword = 'Passwords do not match.';
     if (!certificate) validationErrors.certificate = 'Certificate is required.';
+
+    if (!termsAccepted) {
+      validationErrors.termsAccepted = 'You must accept the terms and conditions.';
+    }
+
+    if (!region) {
+      validationErrors.region = 'Please select region.';
+    }
+
+    if (!district) {
+      validationErrors.district = 'Please select district.';
+    }
+
+    if (!ward) {
+      validationErrors.ward = 'Please select ward.';
+    }
+
 
     Object.keys(validationErrors).forEach((key) => {
       toast.error(validationErrors[key]);
@@ -173,7 +197,8 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
         region: '',
         district: '',
         ward: '',
-        subjects: []
+        subjects: [],
+        termsAccepted: false
       });
       // toast.success(uploadStatus);
       toast.success('Registration successful!');
@@ -407,6 +432,17 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
           value={formData.confirmPassword}
           onChange={handleChange}
         />
+        <FormControlLabel
+            control={
+              <Checkbox
+                name="termsAccepted"
+                checked={formData.termsAccepted}
+                onChange={handleCheck}
+              />
+            }
+            label="I accept the terms and conditions"
+            sx={{ mt: 2 }}
+          />
         <Button variant='contained' sx={{ width: '100%', bgcolor: '#A0826A', mt: 2 }} onClick={handleSubmit}>
           Register
         </Button>

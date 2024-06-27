@@ -4,7 +4,7 @@ import { auth, db } from '../firebaseConfig';
 import { setDoc, doc } from "firebase/firestore";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Button, Input, Typography, Box, FormControl, MenuItem, Select as MUISelect, RadioGroup, Radio, FormControlLabel, Grid, Divider } from '@mui/material';
+import { Button, Input, Typography, Box, FormControl, MenuItem, Select as MUISelect, RadioGroup, Radio, FormControlLabel, Grid, Divider, Checkbox } from '@mui/material';
 import LocalLibraryIcon from '@mui/icons-material/LocalLibrary';
 import Select from 'react-select';
 import Districts from './../assets/Districts.json';
@@ -29,7 +29,8 @@ const SchoolSignupForm = ({ handleSwitchForm }) => {
     genderComposition: '',
     isPrivate: '',
     isReligious: '',
-    religion: ''
+    religion: '',
+    termsAccepted: false
   });
 
   const [districts, setDistricts] = useState([]);
@@ -57,8 +58,8 @@ const SchoolSignupForm = ({ handleSwitchForm }) => {
   }, [formData.district]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type, checked } = e.target;
+    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
   };
 
   const handleSelectChange = (name, option) => {
@@ -70,8 +71,8 @@ const SchoolSignupForm = ({ handleSwitchForm }) => {
 
     const {
       email, password, confirmPassword, schoolName, registrationNumber,
-      phoneNumber, region, district, ward,street, isBoarding, numberOfStudents,
-      schoolType, genderComposition, isPrivate, isReligious, religion
+      phoneNumber, region, district, ward, street, isBoarding, numberOfStudents,
+      schoolType, genderComposition, isPrivate, isReligious, religion, termsAccepted
     } = formData;
 
     // Form validation
@@ -137,7 +138,11 @@ const SchoolSignupForm = ({ handleSwitchForm }) => {
       validationErrors.confirmPassword = 'Passwords do not match.';
     }
 
-    
+    if (!termsAccepted) {
+      validationErrors.termsAccepted = 'You must accept the terms and conditions.';
+    }
+
+
 
     // Display validation errors using toasts
     Object.keys(validationErrors).forEach((key) => {
@@ -197,7 +202,8 @@ const SchoolSignupForm = ({ handleSwitchForm }) => {
         genderComposition: '',
         isPrivate: '',
         isReligious: '',
-        religion: ''
+        religion: '',
+        termsAccepted: false
 
       });
 
@@ -230,12 +236,13 @@ const SchoolSignupForm = ({ handleSwitchForm }) => {
   };
 
   return (
+    <React.Fragment>
     <div>
       <Box>
-        <LocalLibraryIcon />
+        {/* <LocalLibraryIcon />
         <Typography variant="h6">
           School<span style={{ color: '#A0826A' }}>Connect</span>
-        </Typography>
+        </Typography> */}
         <Box sx={{ mt: 2, padding: '5%' }}>
           <Input
             type='text'
@@ -311,13 +318,13 @@ const SchoolSignupForm = ({ handleSwitchForm }) => {
               </Grid>
             </Grid>
             <Input
-            type='text'
-            name='street'
-            placeholder="Street Address"
-            sx={{ width: '100%', mt: 2}}
-            value={formData.street}
-            onChange={handleChange}
-          />
+              type='text'
+              name='street'
+              placeholder="Street Address"
+              sx={{ width: '100%', mt: 2 }}
+              value={formData.street}
+              onChange={handleChange}
+            />
 
           </Box>
 
@@ -379,7 +386,7 @@ const SchoolSignupForm = ({ handleSwitchForm }) => {
                     onChange={handleChange}
                     name="religion"
                     displayEmpty
-                    
+
                   >
                     <MenuItem value="" disabled>
                       Select Religion
@@ -451,13 +458,27 @@ const SchoolSignupForm = ({ handleSwitchForm }) => {
             value={formData.confirmPassword}
             onChange={handleChange}
           />
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="termsAccepted"
+                checked={formData.termsAccepted}
+                onChange={handleChange}
+              />
+            }
+            label="I accept the terms and conditions"
+            sx={{ mt: 2 }}
+          />
         </Box>
         <Button variant='contained' sx={{ width: '100%', bgcolor: '#A0826A' }} onClick={handleSubmit}>
           Register
         </Button>
-
+        
       </Box>
-    </div>
+      </div>
+
+      {/* <ToastContainer /> */}
+    </React.Fragment>
   );
 };
 

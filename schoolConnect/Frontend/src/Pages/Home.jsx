@@ -25,7 +25,7 @@ const Home = () => {
         <NavigationBar />
         <Container component="main" sx={{ flex: '1 0 auto' }}>
           <Typography sx={{ marginTop: '10%', marginLeft: '7%', color: '#A0826A' }}>
-            Suggested for You
+            Volunteering opportunities
             <Badge badgeContent={newApplicationsCount} color="primary" sx={{ position: 'absolute', marginLeft: '0.5rem' }} />
           </Typography>
           <Cards />

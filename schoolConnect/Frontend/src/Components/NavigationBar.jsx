@@ -6,6 +6,7 @@ import SideBar from './SideBar';
 import { Link, useLocation } from 'react-router-dom';
 import ModalComponent from './ModalComponent';
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const NavigationBar = () => {
     const [value, setValue] = useState(0);

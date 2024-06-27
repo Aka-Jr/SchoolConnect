@@ -21,7 +21,9 @@ const AppliedListings = ({ open, handleClose }) => {
   const [applications, setApplications] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
-  const [actionTaken, setActionTaken] = useState(null); // State to track the action taken (accept/reject)
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState(null);
+  const [selectedAction, setSelectedAction] = useState('');
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -51,7 +53,6 @@ const AppliedListings = ({ open, handleClose }) => {
           id: doc.id,
           ...doc.data(),
           subjects: Array.isArray(doc.data().subjects) ? doc.data().subjects : [],
-          // Assuming certificates are stored as URLs in an array field called certificateURLs
           certificateURLs: Array.isArray(doc.data().certificateURLs) ? doc.data().certificateURLs : []
         }));
         setVolunteers(volunteersData);
@@ -68,19 +69,20 @@ const AppliedListings = ({ open, handleClose }) => {
 
   const handleUpdateStatus = async (applicationId, status) => {
     try {
+      setConfirmationOpen(false); // Close confirmation dialog
+      setSelectedApplicationId(null);
+      setSelectedAction('');
+
       const applicationRef = doc(db, 'applications', applicationId);
       const applicationSnapshot = await getDoc(applicationRef);
       const applicationData = applicationSnapshot.data();
       const volunteerId = applicationData.volunteerUID;
       const schoolId = applicationData.schoolUID;
-      
 
-      // Update application status
       await updateDoc(applicationRef, { status });
 
-      // Notify volunteer
       const volunteer = volunteers.find(v => v.uid === volunteerId);
-      const notificationMessage = status === 'accepted'
+      const notificationMessage = status.toLowerCase() === 'accepted'
         ? `Congratulations ${volunteer.firstname}, your application for ${applicationData.schoolName} has been accepted.`
         : `Dear ${volunteer.firstname}, we regret to inform you that your application for ${applicationData.schoolName} has been rejected.`;
 
@@ -92,13 +94,10 @@ const AppliedListings = ({ open, handleClose }) => {
         message: notificationMessage,
       };
 
-      // Store notification in Firestore
       await addDoc(collection(db, 'notifications'), notificationData);
 
-      // Update local state
       setApplications(applications.map(app => app.id === applicationId ? { ...app, status } : app));
       toast.success(`Application ${status}`);
-      setActionTaken(status); // Update action taken state
     } catch (error) {
       console.error(`Error updating application status to ${status}:`, error);
       toast.error(`Failed to update application status: ${error.message}`);
@@ -106,19 +105,28 @@ const AppliedListings = ({ open, handleClose }) => {
   };
 
   const handleVolunteerClick = (application) => {
-    // Find the volunteer details from the volunteers list based on application.volunteerUID
     const volunteer = volunteers.find(v => v.uid === application.volunteerUID);
     setSelectedVolunteer(volunteer);
   };
 
   const handleCloseVolunteerModal = () => {
     setSelectedVolunteer(null);
-    setActionTaken(null); // Reset action taken state when modal is closed
   };
 
   const handleDownloadCertificate = (certificateURL) => {
-    // Function to download certificates using the certificateURL
     window.open(certificateURL, '_blank');
+  };
+
+  const openConfirmationDialog = (applicationId, action) => {
+    setSelectedApplicationId(applicationId);
+    setSelectedAction(action);
+    setConfirmationOpen(true);
+  };
+
+  const handleConfirm = () => {
+    if (selectedApplicationId && selectedAction) {
+      handleUpdateStatus(selectedApplicationId, selectedAction);
+    }
   };
 
   return (
@@ -149,7 +157,6 @@ const AppliedListings = ({ open, handleClose }) => {
               <TableHead>
                 <TableRow>
                   <TableCell>Volunteer Name</TableCell>
-                  {/* <TableCell>Email</TableCell> */}
                   <TableCell>Subjects Applied</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell>Actions</TableCell>
@@ -163,43 +170,29 @@ const AppliedListings = ({ open, handleClose }) => {
                         {application.volunteerName}
                       </Button>
                     </TableCell>
-                    {/* <TableCell>{application.volunteerEmail}</TableCell> */}
                     <TableCell>{application.subjects.join(', ')}</TableCell>
                     <TableCell sx={{ color: application.status === 'rejected' ? 'red' : application.status === 'accepted' ? 'green' : 'inherit' }}>
                       {application.status}
                     </TableCell>
                     <TableCell>
-                      {application.status === 'pending' ? (
+                      {application.status.toLowerCase() === 'pending' && (
                         <>
                           <Button
                             variant="contained"
                             color="success"
-                            onClick={() => handleUpdateStatus(application.id, 'accepted')}
-                            disabled={actionTaken === 'rejected'}
-                            sx={{ marginRight: 1, opacity: actionTaken === 'rejected' ? 0.6 : 1 }}
+                            onClick={() => openConfirmationDialog(application.id, 'accepted')}
+                            sx={{ marginRight: 1 }}
                           >
                             Accept
                           </Button>
                           <Button
                             variant="contained"
                             color="error"
-                            onClick={() => handleUpdateStatus(application.id, 'rejected')}
-                            disabled={actionTaken === 'accepted'}
-                            sx={{ opacity: actionTaken === 'accepted' ? 0.6 : 1 }}
+                            onClick={() => openConfirmationDialog(application.id, 'rejected')}
                           >
                             Reject
                           </Button>
                         </>
-                      ) : (
-                        <Button
-                          variant="contained"
-                          color={application.status === 'accepted' ? 'error' : 'success'}
-                          onClick={() =>
-                            handleUpdateStatus(application.id, application.status === 'accepted' ? 'rejected' : 'accepted')
-                          }
-                        >
-                          {application.status === 'accepted' ? 'Reject' : 'Accept'}
-                        </Button>
                       )}
                     </TableCell>
                   </TableRow>
@@ -209,6 +202,32 @@ const AppliedListings = ({ open, handleClose }) => {
           </TableContainer>
           <Button variant="contained" onClick={handleClose} sx={{ mt: 2 }}>Close</Button>
           <ToastContainer />
+        </Box>
+      </Modal>
+
+      <Modal
+        open={confirmationOpen}
+        onClose={() => setConfirmationOpen(false)}
+        aria-labelledby="confirmation-modal"
+        aria-describedby="confirmation-modal-description"
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Are you sure you want to {selectedAction.toLowerCase()} this application?
+          </Typography>
+          <Button variant="contained" onClick={handleConfirm} sx={{ mr: 2 }}>Yes</Button>
+          <Button variant="contained" onClick={() => setConfirmationOpen(false)}>No</Button>
         </Box>
       </Modal>
 
@@ -253,7 +272,7 @@ const AppliedListings = ({ open, handleClose }) => {
                 <strong>Subjects Capable of Teaching:</strong> {selectedVolunteer.subjects.join(', ')}
               </Typography>
               <Typography variant="body1" gutterBottom>
-                <strong>Certificate:</strong> 
+                <strong>Certificate:</strong>
                 <Box sx={{ mt: 1 }}>
                   <Link href="#" onClick={() => handleDownloadCertificate(selectedVolunteer.certificateURL)}>
                     View Certificate
@@ -261,14 +280,11 @@ const AppliedListings = ({ open, handleClose }) => {
                 </Box>
               </Typography>
               <Typography variant="body1" gutterBottom>
-                <strong>Phone Number:</strong> {selectedVolunteer.phoneNumber}
+                <strong>Additional Notes:</strong> {selectedVolunteer.notes}
               </Typography>
-              <Typography variant="body1" gutterBottom>
-                <strong>Region:</strong> {selectedVolunteer.region}
-              </Typography>
-              <Button variant="contained" onClick={handleCloseVolunteerModal} sx={{ mt: 2 }}>Close</Button>
             </>
           )}
+          <Button variant="contained" onClick={handleCloseVolunteerModal} sx={{ mt: 2 }}>Close</Button>
         </Box>
       </Modal>
     </>

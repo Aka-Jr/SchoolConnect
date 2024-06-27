@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { auth } from '../../firebaseConfig';
-import { doc, getDoc, updateDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs, deleteDoc,orderBy } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import {
     Box,
@@ -31,6 +31,7 @@ import EditVolunteerInfo from './EditVolunteerInfo';
 import VolunteerNotificationsModal from './VolunteerNotificationsModal';
 import SchoolDetailsModal from './SchoolDetailsModal';
 import { getGreetingMessage } from '../../Components/Greetings';
+import SearchComponent from '../../Components/SearchComponent';
 
 const VolunteerzDrawer = ({ handleSignOut }) => {
     const [userData, setUserData] = useState(null);
@@ -86,14 +87,18 @@ const VolunteerzDrawer = ({ handleSignOut }) => {
         try {
             setLoadingNotifications(true);
             const notificationsRef = collection(db, 'notifications');
-            const q = query(notificationsRef, where('volunteerId', '==', volunteerId));
+            const q = query(
+                notificationsRef,
+                where('volunteerId', '==', volunteerId),
+                orderBy('createdAt', 'desc')
+            );
             const querySnapshot = await getDocs(q);
             const notificationsList = [];
             querySnapshot.forEach((doc) => {
                 notificationsList.push({ id: doc.id, ...doc.data() });
             });
     
-            // Sort notifications to have unread notifications first
+            // Sort notifications to have unread notifications first, while keeping the newest ones at the top
             const sortedNotifications = notificationsList.sort((a, b) => a.read - b.read);
     
             setNotifications(sortedNotifications);
@@ -138,45 +143,18 @@ const VolunteerzDrawer = ({ handleSignOut }) => {
 
 
 
-    const handleAccept = async (requestDetails) => {
-        try {
-            const requestDocRef = doc(db, 'requests', requestDetails.id);
-            await updateDoc(requestDocRef, { status: 'accepted' });
-
-            // Send notification to the school
-            const notification = {
-                schoolId: requestDetails.schoolId,
-                message: `Your request has been accepted by ${userData.firstname}.`,
-                timestamp: new Date(),
-                read: false,
-            };
-            await addDoc(collection(db, 'notifications'), notification);
-
-            // Update state and refresh data as needed
-        } catch (error) {
-            console.error('Error accepting request:', error);
-        }
+    const handleAccept = async (requestId) => {
+        const requestDocRef = doc(db, 'requests', requestId);
+        await updateDoc(requestDocRef, { status: 'accepted' });
+        handleCloseModal();
     };
 
-    const handleReject = async (requestDetails) => {
-        try {
-            const requestDocRef = doc(db, 'requests', requestDetails.id);
-            await updateDoc(requestDocRef, { status: 'rejected' });
-
-            // Send notification to the school
-            const notification = {
-                schoolId: requestDetails.schoolId,
-                message: `Your request has been rejected by ${userData.firstname}.`,
-                timestamp: new Date(),
-                read: false,
-            };
-            await addDoc(collection(db, 'notifications'), notification);
-
-            // Update state and refresh data as needed
-        } catch (error) {
-            console.error('Error rejecting request:', error);
-        }
+    const handleReject = async (requestId) => {
+        const requestDocRef = doc(db, 'requests', requestId);
+        await updateDoc(requestDocRef, { status: 'rejected' });
+        handleCloseModal();
     };
+    
 
 
     const handleMarkAsRead = async (notification) => {
@@ -348,6 +326,7 @@ const VolunteerzDrawer = ({ handleSignOut }) => {
                     </List>
                 </Drawer>
             </Box>
+            
             <EditVolunteerInfo
                 open={openModal}
                 handleClose={handleCloseModal}
@@ -380,6 +359,7 @@ const VolunteerzDrawer = ({ handleSignOut }) => {
                 />
 
             )}
+            {/* <SearchComponent searchType="schools" /> */}
 
         </React.Fragment>
     );

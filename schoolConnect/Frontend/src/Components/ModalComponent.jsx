@@ -7,7 +7,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const ModalComponent = ({ open, handleClose, formType, handleSwitchForm }) => {
     return (
-        <div>
+
+        <React.Fragment>
         <Modal
             open={open}
             onClose={handleClose}
@@ -59,7 +60,8 @@ const ModalComponent = ({ open, handleClose, formType, handleSwitchForm }) => {
             </Box>
         </Modal>
          <ToastContainer />
-        </div>
+        </React.Fragment>
+
     );
 }
 
