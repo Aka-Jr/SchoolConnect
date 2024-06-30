@@ -9,6 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { CircularProgress } from '@mui/material';
 import VolunteersCard from '../Volunteers/VolunteersCard';
 import Dashboard from './Dashboard';
+import SearchComponent from '../../Components/SearchComponent';
 
 const AdminsDashboard = () => {
     const [schoolDetails, setSchoolDetails] = useState(null);
@@ -60,7 +61,9 @@ const AdminsDashboard = () => {
         <React.Fragment>
             <SchoolDrawer handleSignOut={handleSignOut} />
             <Box sx={{ mt: 10 }}>
+            {/* <SearchComponent searchType="volunteers"  /> */}
                 <Dashboard />
+                
                 {loading ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
                         <CircularProgress />

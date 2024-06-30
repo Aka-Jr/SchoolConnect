@@ -36,6 +36,10 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
     const [accommodationAvailable, setAccommodationAvailable] = useState(false);
     const [financialAssistance, setFinancialAssistance] = useState(false);
     const [numberOfWeeks, setNumberOfWeeks] = useState(1);
+    const [filterText, setFilterText] = useState('');
+    const [subjectFilter, setSubjectFilter] = useState('');
+    const [locationFilter, setLocationFilter] = useState('');
+    const [genderFilter, setGenderFilter] = useState('');
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -139,14 +143,27 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
         setSnackbarOpen(false);
     };
 
-    if (!Array.isArray(volunteers) || volunteers.length === 0) {
+    const filterVolunteers = (volunteers, filterText, subjectFilter, locationFilter, genderFilter) => {
+        return volunteers.filter((volunteer) =>
+            (volunteer.subjects.some((subject) =>
+                subject.toLowerCase().includes(filterText.toLowerCase())
+            ) || volunteer.location.toLowerCase().includes(filterText.toLowerCase())) &&
+            (subjectFilter === '' || volunteer.subjects.includes(subjectFilter)) &&
+            (locationFilter === '' || volunteer.region.toLowerCase().includes(locationFilter.toLowerCase())) &&
+            (genderFilter === '' || volunteer.gender.toLowerCase() === genderFilter.toLowerCase())
+        );
+    };
+
+    const filteredVolunteers = filterVolunteers(volunteers, filterText, subjectFilter, locationFilter, genderFilter);
+
+    if (!Array.isArray(filteredVolunteers) || filteredVolunteers.length === 0) {
         return <Typography variant="h6" color="textSecondary">No volunteers available.</Typography>;
     }
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem', width: '100%' }}>
-                {volunteers.slice(currentIndex, currentIndex + 3).map((volunteer) => (
+                {filteredVolunteers.slice(currentIndex, currentIndex + 3).map((volunteer) => (
                     <Card key={volunteer.id} sx={{ width: 300, bgcolor: '#0E424C', height: '100%' }}>
                         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                             <CardMedia
@@ -158,41 +175,14 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
                             />
                         </Box>
                         <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                            <Box sx={{ flexGrow: 1, }}>
+                            <Box sx={{ flexGrow: 1 }}>
                                 <Typography gutterBottom variant='h5' sx={{ color: 'white', textAlign: 'center' }}>
                                     {volunteer.firstname} {volunteer.surname}
                                 </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginBottom: '1%', marginTop: '1%' }}>
-                                    Gender: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>
-                                        {volunteer.gender}
-                                    </span>
-                                </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginBottom: '1%', marginTop: '1%' }}>
-                                    Marital Status: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>
-                                        {volunteer.maritalStatus}
-                                    </span>
-                                </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginBottom: '1%', marginTop: '1%' }}>
-                                    Age: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>
-                                        {volunteer.age}
-                                    </span>
-                                </Typography>
                                 <Typography variant='body2' sx={{ color: 'white', marginBottom: '2%', marginTop: '2%', right: 'auto', height: '35px' }}>
-                                    Subjects: <span style={{ color: '#A0826A', fontWeight: 'bold', }}>
+                                    Subjects: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>
                                         {volunteer.subjects.join(', ')}
                                     </span>
-                                </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginTop: '2%', right: 'auto' }}>
-                                    Education Level: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{volunteer.educationLevel}</span>
-                                </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginTop: '2%', right: 'auto' }}>
-                                    Employment Status: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{volunteer.employmentStatus}</span>
-                                </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginTop: '2%', right: 'auto' }}>
-                                    Email: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{volunteer.email}</span>
-                                </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', marginTop: '2%', right: 'auto' }}>
-                                    Phone Number: <span style={{ color: '#A0826A', fontWeight: 'bold' }}>{volunteer.phoneNumber}</span>
                                 </Typography>
                             </Box>
                         </CardContent>
@@ -202,7 +192,8 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
                                 <Typography variant='subtitle'>{volunteer.region}</Typography>
                             </Box>
                         </CardContent>
-                        <CardActions sx={{ justifyContent: 'center' }}>
+                        <CardActions sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', gap: 0.5 }}>
+                            <Button variant='outlined' sx={{ textAlign: 'center', width: '100%', borderColor: '#A0826A', color: '#A0826A' }} onClick={() => setSelectedVolunteer(volunteer)}>View Volunteer Details</Button>
                             <Button variant='contained' sx={{ textAlign: 'center', width: '100%', bgcolor: '#A0826A' }} onClick={() => handleApplyButtonClick(volunteer)}>Request Volunteer</Button>
                         </CardActions>
                     </Card>
@@ -212,8 +203,59 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
                 <Button variant='contained' onClick={handlePreviousClick} disabled={currentIndex === 0}>Previous</Button>
                 <Button variant='contained' onClick={handleNextClick} disabled={currentIndex + 3 >= volunteers.length}>Next</Button>
             </Box>
+            {selectedVolunteer && (
+                <Modal open={Boolean(selectedVolunteer)} onClose={() => setSelectedVolunteer(null)}>
+                    <Box sx={{ 
+                        position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    bgcolor: 'background.paper',
+                    borderRadius: '10px',
+                    boxShadow: 24,
+                    p: 4,
+                    width: 400,
+                    maxHeight: '80%',
+                    margin:'auto',
+                    overflow: 'hidden',
+                    overflowY: 'auto', 
+                        }}>
+                        <Typography variant="h6" gutterBottom>
+                            Volunteer Details
+                        </Typography>
+                        <Typography variant="body2" sx={{ marginBottom: '1%' }}>
+                            Gender: {selectedVolunteer.gender}
+                        </Typography>
+                        <Typography variant="body2" sx={{ marginBottom: '1%' }}>
+                            Marital Status: {selectedVolunteer.maritalStatus}
+                        </Typography>
+                        <Typography variant="body2" sx={{ marginBottom: '1%' }}>
+                            Age: {selectedVolunteer.age}
+                        </Typography>
+                        <Typography variant="body2" sx={{ marginBottom: '1%' }}>
+                            Education Level: {selectedVolunteer.educationLevel}
+                        </Typography>
+                        <Typography variant="body2" sx={{ marginBottom: '1%' }}>
+                            Employment Status: {selectedVolunteer.employmentStatus}
+                        </Typography>
+                        <Typography variant="body2" sx={{ marginBottom: '1%' }}>
+                            Email: {selectedVolunteer.email}
+                        </Typography>
+                        <Typography variant="body2" sx={{ marginBottom: '1%' }}>
+                            Phone Number: {selectedVolunteer.phoneNumber}
+                        </Typography>
+                        <Button variant="contained" onClick={() => setSelectedVolunteer(null)} sx={{ mt: 2 }}>Close</Button>
+                    </Box>
+                </Modal>
+            )}
             <Modal open={isApplicationModalOpen} onClose={handleCloseApplicationModal}>
-                <Box sx={{ p: 4, bgcolor: 'background.paper', margin: 'auto', width: 400, borderRadius: 2 }}>
+                <Box sx={{ 
+                    p: 4,
+                     bgcolor: 'background.paper',
+                      margin: 'auto', 
+                      width: 400, 
+                      borderRadius: 2
+                      }}>
                     <Typography variant="h6" gutterBottom>
                         Request Volunteer
                     </Typography>
@@ -279,9 +321,10 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
                     <Button variant="outlined" onClick={handleCloseApplicationModal} sx={{ mt: 2, ml: 2 }}>Cancel</Button>
                 </Box>
             </Modal>
-
             <Modal open={isLoginModalOpen} onClose={handleCloseLoginModal}>
-                <Box sx={{ p: 4, bgcolor: 'background.paper', margin: 'auto', width: 400, borderRadius: 2 }}>
+                <Box sx={{ 
+                    p: 4, bgcolor: 'background.paper', margin: 'auto', width: 400, borderRadius: 2 
+                    }}>
                     <Typography variant="h6" gutterBottom>
                         Please Log In
                     </Typography>

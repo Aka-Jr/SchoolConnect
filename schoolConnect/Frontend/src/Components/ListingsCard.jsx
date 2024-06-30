@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Card, CardActions, CardContent, CardMedia, Button, Typography, IconButton, Modal } from '@mui/material';
+import { Box, Card, CardActions, CardContent, CardMedia, Button, Typography, IconButton, Modal, TextField, Autocomplete } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import EventIcon from '@mui/icons-material/Event';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import ApplicationModal from '../Pages/Volunteers/ApplicationModal';
-import ModalComponent from './ModalComponent';
 import { deepPurple } from '@mui/material/colors';
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import { format } from 'date-fns';
+import ApplicationModal from '../Pages/Volunteers/ApplicationModal';
+import ModalComponent from './ModalComponent';
 import NotificationPopup from './NotificationPopup';
 
 const ListingsCard = ({ listings }) => {
@@ -21,6 +21,8 @@ const ListingsCard = ({ listings }) => {
     const [showAlreadyAppliedPopup, setShowAlreadyAppliedPopup] = useState(false);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [selectedListingDetails, setSelectedListingDetails] = useState(null);
+    const [searchRegion, setSearchRegion] = useState('');
+    const [searchSchoolName, setsearchSchoolName] = useState();
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -109,10 +111,30 @@ const ListingsCard = ({ listings }) => {
         setSelectedListingDetails(null);
     };
 
-    const filteredListings = listings.filter(listing => listing.status === 'ongoing');
+    const filteredListings = listings.filter(listing =>
+        listing.status === 'ongoing' &&
+        (!searchRegion || listing.location.toLowerCase().includes(searchRegion.toLowerCase())) &&
+        (!searchSchoolName || listing.schoolName.toLowerCase().includes(searchSchoolName.toLowerCase()))
+    );
+    
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: '1rem', width: '100%', marginBottom: '1rem' }}>
+                <TextField
+                    label='Search by Region'
+                    value={searchRegion}
+                    onChange={(e) => setSearchRegion(e.target.value)}
+                    sx={{ width: '40%' }}
+                />
+                <TextField
+                    label='Search by School Name'
+                    value={searchSchoolName}
+                    onChange={(e) => setsearchSchoolName(e.target.value)}
+                    sx={{ width: '40%' }}
+                />
+               
+            </Box>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem', width: '100%' }}>
                 {filteredListings.slice(currentIndex, currentIndex + 3).map((listing) => (
                     <Card key={listing.id} sx={{ maxWidth: 300, bgcolor: '#0E424C', display: 'flex', flexDirection: 'column' }}>
@@ -135,17 +157,17 @@ const ListingsCard = ({ listings }) => {
                                 </Typography>
                             </Box>
                             <Box sx={{ width: '100%' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small', }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small' }}>
                                     <LocationOnIcon sx={{ marginRight: 1 }} />
                                     <Typography variant='subtitle' sx={{ textAlign: 'center' }}>{listing.location}</Typography>
                                 </Box>
-                                <Box sx={{ display:'flex', alignItems: 'center',color: 'white', fontSize: 'small',  marginTop: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: 'small', marginTop: 1 }}>
                                     <AccessTimeIcon sx={{ marginRight: 1 }} />
                                     <Typography variant='subtitle' sx={{ textAlign: 'center' }}>
                                         {listing.numberOfWeeks === 1 ? `${listing.numberOfWeeks} Week` : `${listing.numberOfWeeks} Weeks`}
                                     </Typography>
                                 </Box>
-                                <Box sx={{ display: 'flex', color: 'white', fontSize: 'small', alignItems: 'center', marginTop: 1,}}>
+                                <Box sx={{ display: 'flex', color: 'white', fontSize: 'small', alignItems: 'center', marginTop: 1 }}>
                                     <EventIcon sx={{ marginRight: 1 }} />
                                     {listing.deadline && (
                                         <Typography variant='subtitle' sx={{ textAlign: 'center' }}>
@@ -155,9 +177,9 @@ const ListingsCard = ({ listings }) => {
                                 </Box>
                             </Box>
                         </CardContent>
-                        <CardActions sx={{ justifyContent: 'center' }}>
-                            <Button variant='contained' sx={{ textAlign: 'center', width: '100%', bgcolor: '#A0826A' }} onClick={() => handleApplyButtonClick(listing.id)}>Apply</Button>
-                            <Button variant='outlined' sx={{ textAlign: 'center', width: '100%', color: 'white', borderColor: 'white', marginTop: 1 }} onClick={() => handleViewDetailsClick(listing.id)}>View School Details</Button>
+                        <CardActions sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
+                            <Button variant='outlined' sx={{ textAlign: 'center', width: '100%', color: 'white', borderColor: 'white' }} onClick={() => handleViewDetailsClick(listing.id)}>View School Details</Button>
+                            <Button variant='contained' sx={{ textAlign: 'center', width: '100%', bgcolor: '#A0826A', marginTop: 1 }} onClick={() => handleApplyButtonClick(listing.id)}>Apply</Button>
                         </CardActions>
                     </Card>
                 ))}
@@ -176,7 +198,7 @@ const ListingsCard = ({ listings }) => {
             />
             <ModalComponent open={isLoginModalOpen} handleClose={handleCloseLoginModal} formType='login' />
             <NotificationPopup open={showAlreadyAppliedPopup} handleClose={handleCloseAlreadyAppliedPopup} />
-            
+
             <Modal open={isDetailsModalOpen} onClose={handleCloseDetailsModal}>
                 <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 4, maxWidth: 600, width: '100%' }}>
                     {selectedListingDetails && (

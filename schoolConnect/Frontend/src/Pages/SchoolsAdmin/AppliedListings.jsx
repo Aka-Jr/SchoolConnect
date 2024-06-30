@@ -24,6 +24,8 @@ const AppliedListings = ({ open, handleClose }) => {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState(null);
   const [selectedAction, setSelectedAction] = useState('');
+  const [unavailableOpen, setUnavailableOpen] = useState(false);
+  const [unavailableMessage, setUnavailableMessage] = useState('');
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -72,20 +74,52 @@ const AppliedListings = ({ open, handleClose }) => {
       setConfirmationOpen(false); // Close confirmation dialog
       setSelectedApplicationId(null);
       setSelectedAction('');
-
+  
       const applicationRef = doc(db, 'applications', applicationId);
       const applicationSnapshot = await getDoc(applicationRef);
       const applicationData = applicationSnapshot.data();
       const volunteerId = applicationData.volunteerUID;
       const schoolId = applicationData.schoolUID;
-
+  
+      const volunteerRef = doc(db, 'users', volunteerId);
+      const volunteerSnapshot = await getDoc(volunteerRef);
+      const volunteerData = volunteerSnapshot.data();
+  
+      // Check if the volunteer can be accepted
+      if (status.toLowerCase() === 'accepted' && volunteerData.availabilityStatus !== 'available') {
+        // Notify the volunteer about their current status
+        const notificationMessage = `Dear ${volunteerData.firstname}, we regret to inform you that we cannot proceed with your application at this time, as you have already been accepted for a volunteering opportunity at another school. We encourage you to complete your current commitment and hope you will consider applying for future opportunities with us.`;
+        const schoolNotificationMessage = `Volunteer ${volunteerData.firstname} ${volunteerData.surname} cannot be accepted as they are already committed to another volunteering opportunity.`;
+        const notificationData = {
+          createdAt: new Date(),
+          type: 'application',
+          volunteerId,
+          schoolId,
+          message: notificationMessage,
+        };
+  
+        await addDoc(collection(db, 'notifications'), notificationData);
+  
+        // Display modal or notification to the user
+        setUnavailableMessage(schoolNotificationMessage);
+        setUnavailableOpen(true);
+  
+        return;
+      }
+  
+      // Update application status
       await updateDoc(applicationRef, { status });
-
-      const volunteer = volunteers.find(v => v.uid === volunteerId);
+  
+      // Update volunteer availability if accepted
+      if (status.toLowerCase() === 'accepted') {
+        await updateDoc(volunteerRef, { availabilityStatus: 'unavailable' });
+      }
+  
+      // Create notification for volunteer based on status
       const notificationMessage = status.toLowerCase() === 'accepted'
-        ? `Congratulations ${volunteer.firstname}, your application for ${applicationData.schoolName} has been accepted.`
-        : `Dear ${volunteer.firstname}, we regret to inform you that your application for ${applicationData.schoolName} has been rejected.`;
-
+        ? `Congratulations ${volunteerData.firstname}, your application for ${applicationData.schoolName} has been accepted.`
+        : `Dear ${volunteerData.firstname}, we regret to inform you that your application for ${applicationData.schoolName} has been rejected.`;
+  
       const notificationData = {
         createdAt: new Date(),
         type: 'application',
@@ -93,9 +127,10 @@ const AppliedListings = ({ open, handleClose }) => {
         schoolId,
         message: notificationMessage,
       };
-
+  
       await addDoc(collection(db, 'notifications'), notificationData);
-
+  
+      // Update state to reflect application status change
       setApplications(applications.map(app => app.id === applicationId ? { ...app, status } : app));
       toast.success(`Application ${status}`);
     } catch (error) {
@@ -103,6 +138,7 @@ const AppliedListings = ({ open, handleClose }) => {
       toast.error(`Failed to update application status: ${error.message}`);
     }
   };
+  
 
   const handleVolunteerClick = (application) => {
     const volunteer = volunteers.find(v => v.uid === application.volunteerUID);
@@ -127,6 +163,11 @@ const AppliedListings = ({ open, handleClose }) => {
     if (selectedApplicationId && selectedAction) {
       handleUpdateStatus(selectedApplicationId, selectedAction);
     }
+  };
+
+  const getVolunteerName = (volunteerUID) => {
+    const volunteer = volunteers.find(v => v.uid === volunteerUID);
+    return volunteer ? `${volunteer.firstname} ${volunteer.surname}` : 'Unknown Volunteer';
   };
 
   return (
@@ -167,7 +208,7 @@ const AppliedListings = ({ open, handleClose }) => {
                   <TableRow key={application.id}>
                     <TableCell>
                       <Button onClick={() => handleVolunteerClick(application)}>
-                        {application.volunteerName}
+                        {getVolunteerName(application.volunteerUID)}
                       </Button>
                     </TableCell>
                     <TableCell>{application.subjects.join(', ')}</TableCell>
@@ -285,6 +326,33 @@ const AppliedListings = ({ open, handleClose }) => {
             </>
           )}
           <Button variant="contained" onClick={handleCloseVolunteerModal} sx={{ mt: 2 }}>Close</Button>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={unavailableOpen}
+        onClose={() => setUnavailableOpen(false)}
+        aria-labelledby="unavailable-modal"
+        aria-describedby="unavailable-modal-description"
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            {unavailableMessage}
+          </Typography>
+          <Button variant="contained" onClick={() => setUnavailableOpen(false)} sx={{ mt: 2 }}>
+            Close
+          </Button>
         </Box>
       </Modal>
     </>

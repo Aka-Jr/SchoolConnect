@@ -10,6 +10,7 @@ import Cards from '../../Components/Cards';
 import Footer from '../../Components/Footer';
 import ApplicationModal from './ApplicationModal'; // Import the ApplicationModal component
 import VolunteerNotificationsModal from './VolunteerNotificationsModal';
+import SearchComponent from '../../Components/SearchComponent';
 
 
 const VolunteersDashboard = () => {
@@ -41,6 +42,7 @@ const VolunteersDashboard = () => {
                 <Container component="main" sx={{ flex: '1 0 auto' }}>
                     <Box sx={{ mt: 10 }}>
                         <VolunteerzDrawer handleSignOut={handleSignOut} />
+                        {/* <SearchComponent searchType="schools" /> */}
                         <DashboardCards />
 
                         <Typography variant="h4" sx={{ textAlign: 'center', mt: 5, mb: 2 }}>Voluntering Opportunities</Typography>

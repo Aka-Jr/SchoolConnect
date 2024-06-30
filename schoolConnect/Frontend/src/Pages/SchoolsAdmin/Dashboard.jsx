@@ -6,7 +6,8 @@ import ListingFormModal from './ListingFormModal';
 import ListingsManager from './ListingsManager';
 import AppliedListings from './AppliedListings';
 import ApplicationsListModal from './ApplicationsListModal';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import RequestedVolunteers from './RequestedVolunteers'; // Import the component
+import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../firebaseConfig';
 
 const Dashboard = () => {
@@ -14,6 +15,7 @@ const Dashboard = () => {
     const [isAppliedListModalOpen, setIsAppliedListModalOpen] = useState(false);
     const [isViewListModalOpen, setIsViewListModalOpen] = useState(false);
     const [isApplicationsListModalOpen, setIsApplicationsListModalOpen] = useState(false);
+    const [isRequestedVolunteersModalOpen, setIsRequestedVolunteersModalOpen] = useState(false); // New state for the RequestedVolunteers modal
     const [listings, setListings] = useState([]);
     const [selectedListingId, setSelectedListingId] = useState(null);
     const [user, setUser] = useState(null);
@@ -49,6 +51,14 @@ const Dashboard = () => {
 
     const handleCloseViewListModal = () => {
         setIsViewListModalOpen(false);
+    };
+
+    const handleOpenRequestedVolunteersModal = () => {
+        setIsRequestedVolunteersModalOpen(true);
+    };
+
+    const handleCloseRequestedVolunteersModal = () => {
+        setIsRequestedVolunteersModalOpen(false);
     };
 
     const handleOpenApplicationsListModal = (listingId) => {
@@ -125,10 +135,7 @@ const Dashboard = () => {
                             <CardActions sx={{ justifyContent: 'center' }}>
                                 <Button
                                     sx={{ color: 'white', width: '100%' }}
-                                    onClick={() => {
-                                        fetchListings();
-                                        handleOpenViewListModal();
-                                    }}
+                                    onClick={handleOpenRequestedVolunteersModal}
                                 >
                                     View
                                 </Button>
@@ -153,24 +160,6 @@ const Dashboard = () => {
                             </CardActions>
                         </Card>
                     </Grid>
-                    {/* <Grid item xs={2}>
-                        <Card sx={{ bgcolor: '#0E424C', textAlign: 'center' }}>
-                            <Typography sx={{ color: 'white' }}>Volunteer Applications</Typography>
-                            <CardContent>
-                                <IconButton sx={{ color: 'white' }}>
-                                    <ViewListIcon />
-                                </IconButton>
-                            </CardContent>
-                            <CardActions sx={{ justifyContent: 'center' }}>
-                                <Button
-                                    sx={{ color: 'white', width: '100%' }}
-                                    onClick={() => handleOpenApplicationsListModal('your-listing-id')} // Replace 'your-listing-id' with the actual listing ID
-                                >
-                                    View
-                                </Button>
-                            </CardActions>
-                        </Card>
-                    </Grid> */}
                 </Grid>
             </Box>
             <ListingFormModal open={isModalOpen} handleClose={handleCloseModal} />
@@ -181,8 +170,15 @@ const Dashboard = () => {
                 handleClose={handleCloseApplicationsListModal}
                 listingId={selectedListingId}
             />
+            {/* Add RequestedVolunteers modal */}
+            <RequestedVolunteers
+                open={isRequestedVolunteersModalOpen}
+                handleClose={handleCloseRequestedVolunteersModal}
+                schoolId={user ? user.uid : null} // Pass the school ID to fetch requests for the logged-in school
+            />
         </React.Fragment>
     );
 };
 
 export default Dashboard;
+
