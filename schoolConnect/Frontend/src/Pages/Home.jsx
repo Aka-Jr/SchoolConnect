@@ -1,47 +1,61 @@
-import React from 'react'
-import Cards from '../Components/Cards';
-import { Box,Badge, Container, Typography } from '@mui/material';
-import { Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Box, Container, Typography } from '@mui/material';
 import NavigationBar from '../Components/NavigationBar';
 import Footer from '../Components/Footer';
+import WelcomeMessage from '../Components/WelcomeMesaage';
+import Cards from '../Components/Cards';
+import VolunteersCard from './Volunteers/VolunteersCard';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 const Home = () => {
-  const newApplicationsCount = "new";
+  const [userType, setUserType] = useState(null);
+  const auth = getAuth();
+  const db = getFirestore();
 
+  useEffect(() => {
+    const checkUserType = async (uid) => {
+      const schoolDoc = await getDoc(doc(db, 'schools', uid));
+      if (schoolDoc.exists()) {
+        setUserType('school');
+        return;
+      }
+      const volunteerDoc = await getDoc(doc(db, 'volunteers', uid));
+      if (volunteerDoc.exists()) {
+        setUserType('volunteer');
+        return;
+      }
+      setUserType(null);
+    };
 
-  // if (user) {
-  //   // Check if the user is a volunteer
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        checkUserType(user.uid);
+      } else {
+        setUserType(null);
+      }
+    });
 
-  //   return <Navigate to="/user" />;
-  // }
-  // // Check if the user is a school admin
-
+    return () => unsubscribe();
+  }, [auth, db]);
 
   return (
     <React.Fragment>
-
-
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <NavigationBar />
-        <Container component="main" sx={{ flex: '1 0 auto' }}>
-          <Typography sx={{ marginTop: '10%', marginLeft: '7%', color: '#A0826A' }}>
-            Volunteering opportunities
-            <Badge badgeContent={newApplicationsCount} color="primary" sx={{ position: 'absolute', marginLeft: '0.5rem' }} />
+        <Container component="main" sx={{ flex: '1 0 auto', marginTop: '5%' }}>
+          {!userType && <WelcomeMessage />}
+          <Typography variant="h5" sx={{ color: '#A0826A', marginLeft: '7%', marginBottom: '20px' }}>
+            {userType === 'school'
+              ? 'Discover Available Volunteers'
+              : 'Discover Available Volunteering Opportunities'}
           </Typography>
-          <Cards />
-          <Container >
-            <Typography sx={{ marginTop: '5%', marginLeft: '7%', color: '#A0826A' }}>
-              All
-            </Typography>
-            <Cards />
-
-          </Container>
+          {userType === 'school' ? <VolunteersCard /> : <Cards />}
         </Container>
         <Footer />
       </Box>
-
     </React.Fragment>
-  )
-}
+  );
+};
 
 export default Home;

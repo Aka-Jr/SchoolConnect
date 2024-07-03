@@ -41,7 +41,7 @@ const DashboardCards = () => {
                             {/* Content for Submitted Applications */}
                             <CardContent>
                                 <IconButton sx={{ color: 'white' }}>
-                                    <ArrowUpwardIcon />
+                                    <ArrowUpwardIcon   onClick={handleOpenModal}/>
                                 </IconButton>
                             </CardContent>
                             <CardActions sx={{ justifyContent: 'center' }}>
@@ -54,7 +54,7 @@ const DashboardCards = () => {
                             <Typography sx={{ color: 'white' }}>My Education Details</Typography>
                             <CardContent>
                                 <IconButton sx={{ color: 'white' }}>
-                                    <ArrowUpwardIcon />
+                                    <ArrowUpwardIcon  onClick={handleOpen}/>
                                 </IconButton>
                             </CardContent>
                             <CardActions sx={{ justifyContent: 'center' }}>

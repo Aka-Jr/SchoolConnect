@@ -1,49 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import SchoolDrawer from './SchoolDrawer';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../../firebaseConfig';
-import { addDoc, collection, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { getDoc, doc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { CircularProgress } from '@mui/material';
 import VolunteersCard from '../Volunteers/VolunteersCard';
 import Dashboard from './Dashboard';
-import SearchComponent from '../../Components/SearchComponent';
 
 const AdminsDashboard = () => {
     const [schoolDetails, setSchoolDetails] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      const fetchUserData = async () => {
-          try {
-              const user = auth.currentUser;
-              console.log('Current user:', user);
-  
-              if (user) {
-                  const userDocRef = doc(db, 'schools', user.uid);
-                  const userDocSnap = await getDoc(userDocRef);
-                  if (userDocSnap.exists()) {
-                      setSchoolDetails(userDocSnap.data()); // Corrected function name
-                      console.log('User data:', userDocSnap.data());
-                  } else {
-                      console.log('No such document!');
-                  }
-              } else {
-                  console.log('User not logged in.');
-              }
-              setLoading(false); // Set loading to false once data is fetched
-          } catch (error) {
-              console.error('Error fetching user data:', error);
-              setLoading(false); // Handle loading state in case of error
-          }
-      };
-  
-      fetchUserData();
-  }, []);
-  
-  
+        const fetchUserData = async () => {
+            try {
+                const user = auth.currentUser;
+                if (user) {
+                    const userDocRef = doc(db, 'schools', user.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (userDocSnap.exists()) {
+                        setSchoolDetails(userDocSnap.data());
+                    } else {
+                        console.log('No such document!');
+                    }
+                } else {
+                    console.log('User not logged in.');
+                }
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                setLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, []);
 
     const handleSignOut = async () => {
         try {
@@ -51,6 +44,7 @@ const AdminsDashboard = () => {
             // Introduce a delay to ensure the sign-out process completes before displaying the toast
             await new Promise((resolve) => setTimeout(resolve, 1000));
             toast.success('Sign-out successful');
+            // Optionally, clear state or perform any necessary cleanup
         } catch (error) {
             console.error('Sign-out error:', error);
             toast.error('Failed to sign out. Please try again later.');
@@ -61,9 +55,8 @@ const AdminsDashboard = () => {
         <React.Fragment>
             <SchoolDrawer handleSignOut={handleSignOut} />
             <Box sx={{ mt: 10 }}>
-            {/* <SearchComponent searchType="volunteers"  /> */}
                 <Dashboard />
-                
+
                 {loading ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
                         <CircularProgress />

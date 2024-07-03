@@ -187,6 +187,7 @@ const SchoolSignupForm = ({ handleSwitchForm }) => {
       // Clear form inputs
       setFormData({
         email: '',
+        userType: 'school',
         password: '',
         confirmPassword: '',
         schoolName: '',

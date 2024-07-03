@@ -44,7 +44,7 @@ const VolunteerProfileModal = ({ open, handleClose }) => {
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                bgcolor: '#0E424C',
+                bgcolor: '#c0c0c0',
                 boxShadow: 24,
                 p: 4,
                 maxHeight: '80%',

@@ -12,6 +12,8 @@ import {
   Modal,
   Button,
   Link,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { collection, query, where, getDocs, updateDoc, doc, addDoc, getDoc } from 'firebase/firestore';
 import { db, auth } from '../../firebaseConfig';
@@ -26,6 +28,8 @@ const AppliedListings = ({ open, handleClose }) => {
   const [selectedAction, setSelectedAction] = useState('');
   const [unavailableOpen, setUnavailableOpen] = useState(false);
   const [unavailableMessage, setUnavailableMessage] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterTime, setFilterTime] = useState('all'); // State for time filter
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -36,12 +40,27 @@ const AppliedListings = ({ open, handleClose }) => {
       }
 
       try {
-        console.log(`Fetching applications for schoolUID: ${currentUser.uid}`);
-        const q = query(collection(db, 'applications'), where('schoolUID', '==', currentUser.uid));
+        let q = query(collection(db, 'applications'), where('schoolUID', '==', currentUser.uid));
+
+        // Apply time filter
+        if (filterTime !== 'all') {
+          const now = new Date();
+          let startDate = new Date();
+          startDate.setDate(now.getDate() - (filterTime === 'last24Hours' ? 1 : filterTime === 'last7Days' ? 7 : 30));
+
+          q = query(q, where('timestamp', '>=', startDate), where('timestamp', '<=', now));
+        }
+
         const querySnapshot = await getDocs(q);
         const fetchedApplications = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         console.log('Fetched applications:', fetchedApplications);
-        setApplications(fetchedApplications);
+
+        // Apply status filter
+        const filteredApplications = filterStatus === 'all'
+          ? fetchedApplications
+          : fetchedApplications.filter(app => app.status.toLowerCase() === filterStatus.toLowerCase());
+
+        setApplications(filteredApplications);
       } catch (error) {
         console.error('Error fetching applications:', error);
       }
@@ -67,24 +86,24 @@ const AppliedListings = ({ open, handleClose }) => {
       fetchApplications();
       fetchVolunteers();
     }
-  }, [open]);
+  }, [open, filterStatus, filterTime]); // Ensure useEffect dependencies include filterTime
 
   const handleUpdateStatus = async (applicationId, status) => {
     try {
       setConfirmationOpen(false); // Close confirmation dialog
       setSelectedApplicationId(null);
       setSelectedAction('');
-  
+
       const applicationRef = doc(db, 'applications', applicationId);
       const applicationSnapshot = await getDoc(applicationRef);
       const applicationData = applicationSnapshot.data();
       const volunteerId = applicationData.volunteerUID;
       const schoolId = applicationData.schoolUID;
-  
+
       const volunteerRef = doc(db, 'users', volunteerId);
       const volunteerSnapshot = await getDoc(volunteerRef);
       const volunteerData = volunteerSnapshot.data();
-  
+
       // Check if the volunteer can be accepted
       if (status.toLowerCase() === 'accepted' && volunteerData.availabilityStatus !== 'available') {
         // Notify the volunteer about their current status
@@ -97,29 +116,29 @@ const AppliedListings = ({ open, handleClose }) => {
           schoolId,
           message: notificationMessage,
         };
-  
+
         await addDoc(collection(db, 'notifications'), notificationData);
-  
+
         // Display modal or notification to the user
         setUnavailableMessage(schoolNotificationMessage);
         setUnavailableOpen(true);
-  
+
         return;
       }
-  
+
       // Update application status
       await updateDoc(applicationRef, { status });
-  
+
       // Update volunteer availability if accepted
       if (status.toLowerCase() === 'accepted') {
         await updateDoc(volunteerRef, { availabilityStatus: 'unavailable' });
       }
-  
+
       // Create notification for volunteer based on status
       const notificationMessage = status.toLowerCase() === 'accepted'
         ? `Congratulations ${volunteerData.firstname}, your application for ${applicationData.schoolName} has been accepted.`
         : `Dear ${volunteerData.firstname}, we regret to inform you that your application for ${applicationData.schoolName} has been rejected.`;
-  
+
       const notificationData = {
         createdAt: new Date(),
         type: 'application',
@@ -127,9 +146,9 @@ const AppliedListings = ({ open, handleClose }) => {
         schoolId,
         message: notificationMessage,
       };
-  
+
       await addDoc(collection(db, 'notifications'), notificationData);
-  
+
       // Update state to reflect application status change
       setApplications(applications.map(app => app.id === applicationId ? { ...app, status } : app));
       toast.success(`Application ${status}`);
@@ -138,7 +157,6 @@ const AppliedListings = ({ open, handleClose }) => {
       toast.error(`Failed to update application status: ${error.message}`);
     }
   };
-  
 
   const handleVolunteerClick = (application) => {
     const volunteer = volunteers.find(v => v.uid === application.volunteerUID);
@@ -157,12 +175,6 @@ const AppliedListings = ({ open, handleClose }) => {
     setSelectedApplicationId(applicationId);
     setSelectedAction(action);
     setConfirmationOpen(true);
-  };
-
-  const handleConfirm = () => {
-    if (selectedApplicationId && selectedAction) {
-      handleUpdateStatus(selectedApplicationId, selectedAction);
-    }
   };
 
   const getVolunteerName = (volunteerUID) => {
@@ -193,6 +205,34 @@ const AppliedListings = ({ open, handleClose }) => {
           }}
         >
           <Typography variant="h5" gutterBottom>Applied Listings</Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <div>
+              <Typography variant="body1" sx={{ mr: 2 }}>Filter by Status:</Typography>
+              <Select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                sx={{ minWidth: 120 }}
+              >
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="accepted">Accepted</MenuItem>
+                <MenuItem value="rejected">Rejected</MenuItem>
+              </Select>
+            </div>
+            <div>
+              <Typography variant="body1" sx={{ mr: 2 }}>Filter by Time:</Typography>
+              <Select
+                value={filterTime}
+                onChange={(e) => setFilterTime(e.target.value)}
+                sx={{ minWidth: 120 }}
+              >
+                <MenuItem value="all">All Time</MenuItem>
+                <MenuItem value="last24Hours">Last 24 Hours</MenuItem>
+                <MenuItem value="last7Days">Last 7 Days</MenuItem>
+                <MenuItem value="last30Days">Last 30 Days</MenuItem>
+              </Select>
+            </div>
+          </Box>
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 750, overflowX: 'auto' }} aria-label="applied listings table">
               <TableHead>
@@ -267,8 +307,12 @@ const AppliedListings = ({ open, handleClose }) => {
           <Typography variant="h6" gutterBottom>
             Are you sure you want to {selectedAction.toLowerCase()} this application?
           </Typography>
-          <Button variant="contained" onClick={handleConfirm} sx={{ mr: 2 }}>Yes</Button>
-          <Button variant="contained" onClick={() => setConfirmationOpen(false)}>No</Button>
+          <Button variant="contained" onClick={() => handleUpdateStatus(selectedApplicationId, selectedAction)}>
+            Yes
+          </Button>
+          <Button variant="contained" onClick={() => setConfirmationOpen(false)}>
+            No
+          </Button>
         </Box>
       </Modal>
 

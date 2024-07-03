@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db, storage } from '../../firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import {
   Box,
@@ -19,7 +20,7 @@ import EditSchoolInfo from './EditSchoolInfo';
 import ListingsCard from '../../Components/ListingsCard';
 import ListingFormModal from './ListingFormModal';
 
-const SchoolDrawer = ({ handleSignOut }) => {
+const SchoolDrawer = () => {
   const [userData, setUserData] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [user, setUser] = useState(null);
@@ -27,6 +28,21 @@ const SchoolDrawer = ({ handleSignOut }) => {
   const [profileImage, setProfileImage] = useState('');
   const [imageUpload, setImageUpload] = useState(null);
   const [isEditingImage, setIsEditingImage] = useState(false);
+
+
+  useEffect(() => {
+    // Listen for authentication state changes
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+            setIsLoggedIn(true);
+        } else {
+            setIsLoggedIn(false);
+        }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+}, [auth]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -183,7 +199,7 @@ const SchoolDrawer = ({ handleSignOut }) => {
             ))}
             <Divider />
             <ListItem>
-              <ListItemButton onClick={handleSignOut}>
+              <ListItemButton  onClick={() => auth.signOut()}>
                 <ListItemIcon>
                   <LogoutIcon />
                 </ListItemIcon>

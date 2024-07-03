@@ -39,9 +39,7 @@ const VolunteersCard = ({ schoolDetails }) => {
 
     return (
         <Box sx={{ mt: 5 }}>
-            <Typography variant='h6' sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '2%' }}>
-                Volunteers
-            </Typography>
+            
             <VolunteerCardsModal volunteers={volunteers} schoolDetails={schoolDetails} />
         </Box>
     );

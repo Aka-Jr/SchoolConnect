@@ -21,6 +21,7 @@ const ListingFormModal = ({ handleClose, open }) => {
     description: '',
     numberOfWeeks: '',
     willProvideAccommodation: false,
+    willProvideFinancialAssistance: false,
     deadline: null, // Add deadline field
   });
 
@@ -82,11 +83,11 @@ const ListingFormModal = ({ handleClose, open }) => {
         district: userData.district,
         ward: userData.ward,
         schoolName: userData.schoolName,
-        email: userData.email,
-        genderComposition: userData.genderComposition,
-        numberOfStudents: userData.numberOfStudents,
-        isBoarding: userData.isBoarding,
-        isReligious: userData.isReligious,
+        // email: userData.email,
+        // genderComposition: userData.genderComposition,
+        // numberOfStudents: userData.numberOfStudents,
+        // isBoarding: userData.isBoarding,
+        // isReligious: userData.isReligious,
         status: 'ongoing',
       });
 
@@ -97,6 +98,7 @@ const ListingFormModal = ({ handleClose, open }) => {
         description: '',
         numberOfWeeks: '',
         willProvideAccommodation: false,
+        willProvideFinancialAssistance: false,
         deadline: null,
       });
 
@@ -169,6 +171,18 @@ const ListingFormModal = ({ handleClose, open }) => {
                   />
                 }
                 label="Will Provide Accommodation"
+              />
+            </FormControl>
+            <FormControl sx={{ mt: 1 }} fullWidth>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="willProvideFinancialAssistance"
+                    checked={listingData.willProvideFinancialAssistance}
+                    onChange={handleCheckboxChange}
+                  />
+                }
+                label="Will Provide Financial Assistance"
               />
             </FormControl>
 

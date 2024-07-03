@@ -32,8 +32,9 @@ import VolunteerNotificationsModal from './VolunteerNotificationsModal';
 import SchoolDetailsModal from './SchoolDetailsModal';
 import { getGreetingMessage } from '../../Components/Greetings';
 import SearchComponent from '../../Components/SearchComponent';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
-const VolunteerzDrawer = ({ handleSignOut }) => {
+const VolunteerzDrawer = () => {
     const [userData, setUserData] = useState(null);
     const [openModal, setOpenModal] = useState(false);
     const [notifications, setNotifications] = useState([]);
@@ -44,6 +45,20 @@ const VolunteerzDrawer = ({ handleSignOut }) => {
     const [schoolDetailsModalOpen, setSchoolDetailsModalOpen] = useState(false);
     const [requestDetails, setRequestDetails] = useState(null); // State to store request details
     const [notificationType, setNotificationType] = useState(null);
+
+    useEffect(() => {
+        // Listen for authentication state changes
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setIsLoggedIn(true);
+            } else {
+                setIsLoggedIn(false);
+            }
+        });
+
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
+    }, [auth]);
 
 
     const { message, icon, color } = getGreetingMessage();
@@ -300,8 +315,8 @@ const VolunteerzDrawer = ({ handleSignOut }) => {
                         )}
                     </Box>
                     <Typography variant='h6' sx={{ justifyContent: 'center', display: 'flex', mt: 2 }}>{userData ? userData.email : ''}</Typography>
-                    <List>
-                        {Pages.map((page, index) => (<ListItem key={index} sx={{ display: 'block' }} onClick={() => handleListItemClick(page)}>
+                    <List sx={{top: '40%'}}>
+                        {/* {Pages.map((page, index) => (<ListItem key={index} sx={{ display: 'block' }} onClick={() => handleListItemClick(page)}>
                             <ListItemButton>
                                 <ListItemIcon>
                                     {Icons[page]}
@@ -311,10 +326,10 @@ const VolunteerzDrawer = ({ handleSignOut }) => {
                                 </ListItemText>
                             </ListItemButton>
                         </ListItem>
-                        ))}
+                        ))} */}
                         <Divider />
-                        <ListItem>
-                            <ListItemButton onClick={handleSignOut}>
+                        <ListItem >
+                            <ListItemButton onClick={() => auth.signOut()}>
                                 <ListItemIcon>
                                     <LogoutIcon />
                                 </ListItemIcon>

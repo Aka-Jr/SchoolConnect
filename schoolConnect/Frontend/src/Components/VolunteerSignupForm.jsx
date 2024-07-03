@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Input, Typography, Box, Grid, FormControl, RadioGroup, FormControlLabel, Radio, MenuItem, Select as MUISelect, Divider, IconButton, Checkbox } from '@mui/material';
+import { Button, Input, Typography, Box, Grid, FormControl, RadioGroup, FormControlLabel, Radio, MenuItem, Select as MUISelect, Divider, IconButton, Checkbox, TextField, InputLabel } from '@mui/material';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db, storage } from '../firebaseConfig';
 import { setDoc, doc } from "firebase/firestore";
@@ -82,7 +82,7 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
     const { name, value, type, checked } = e.target;
     setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
   };
-  
+
 
   const handleSelectChange = (id, option) => {
     setFormData(prevFormData => ({ ...prevFormData, [id]: option.value }));
@@ -95,7 +95,7 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { firstname, surname, email, region, district, ward, password, confirmPassword, phoneNumber, gender, age, maritalStatus, educationLevel, certificate, employmentStatus,availabilityStatus, subjects, termsAccepted } = formData;
+    const { firstname, surname, email, region, district, ward, password, confirmPassword, phoneNumber, gender, age, maritalStatus, educationLevel, certificate, employmentStatus, availabilityStatus, subjects, termsAccepted } = formData;
 
     const validationErrors = {};
 
@@ -226,213 +226,225 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
 
   return (
     <React.Fragment>
-    <div>
-      <Box>
-        <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Basic Information</Typography></Divider>
-        <Input
-          type='text'
-          id='firstname'
-          placeholder="First name"
-          sx={{ width: '100%' }}
-          value={formData.firstname}
-          onChange={handleChange}
-        />
-        <Input
-          type='text'
-          id='surname'
-          placeholder="Surname"
-          sx={{ width: '100%', mt: 2 }}
-          value={formData.surname}
-          onChange={handleChange}
-        />
-        <Input
-          type='text'
-          id='phoneNumber'
-          placeholder="Phone Number"
-          sx={{ width: '100%', mt: 2 }}
-          value={formData.phoneNumber}
-          onChange={handleChange}
-        />
-        <Input
-          type='email'
-          id='email'
-          placeholder="Email"
-          sx={{ width: '100%', mt: 2 }}
-          value={formData.email}
-          onChange={handleChange}
-        />
-        <FormControl component="fieldset" sx={{ width: '100%', mt: 2 }}>
-          <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Gender</Typography></Divider>
-          <RadioGroup
-            row
-            aria-label="gender"
-            id="gender"
-            value={formData.gender}
-            onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-          >
-            <FormControlLabel value="Male" control={<Radio />} label="Male" />
-            <FormControlLabel value="Female" control={<Radio />} label="Female" />
-            {/* <FormControlLabel value="other" control={<Radio />} label="Other" /> */}
-          </RadioGroup>
-        </FormControl>
-        <Input
-          type='number'
-          id='age'
-          placeholder="Age"
-          sx={{ width: '100%', mt: 2 }}
-          value={formData.age}
-          onChange={handleChange}
-        />
-
-        <FormControl fullWidth sx={{ marginBottom: '16px', mt: 2 }}>
-          <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Marital Status</Typography></Divider>
-          <MUISelect
-            value={formData.maritalStatus}
-            onChange={(e) => setFormData({ ...formData, maritalStatus: e.target.value })}
-            id="maritalStatus"
-            displayEmpty
-          >
-            <MenuItem value="Single">Single</MenuItem>
-            <MenuItem value="Married">Married</MenuItem>
-          </MUISelect>
-        </FormControl>
-
-        <FormControl fullWidth sx={{ marginBottom: '16px' }}>
-          <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Education Level</Typography></Divider>
-          <MUISelect
-            value={formData.educationLevel}
-            onChange={(e) => setFormData({ ...formData, educationLevel: e.target.value })}
-            id="educationLevel"
-            displayEmpty
-          >
-            <MenuItem value="Diploma">Diploma</MenuItem>
-            <MenuItem value="Bachelor">Bachelor</MenuItem>
-          </MUISelect>
-        </FormControl>
-
-        <div {...getRootProps()} style={{ border: '2px dashed #A0826A', padding: '20px', textAlign: 'center', marginTop: '16px' }}>
-          <input {...getInputProps()} />
-          {
-            isDragActive ?
-              <p>Drop the certificate here...</p> :
-              <p>Drag 'n' drop your certificate here, or click to select file</p>
-          }
-        </div>
-        {formData.certificate && (
-          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-            <Typography variant="body2" sx={{ mr: 2 }}>
-              Selected file: {formData.certificate.name}
-            </Typography>
-            <IconButton onClick={handleRemoveFile}>
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        )}
-
-        {uploadStatus && ( // Display upload status message
-          <Typography variant="body2" sx={{ mt: 2, color: 'green' }}>
-            {uploadStatus}
-          </Typography>
-        )}
-
-        <FormControl component="fieldset" sx={{ width: '100%', mt: 2 }}>
-          <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Employment Status</Typography></Divider>
-          <RadioGroup
-            row
-            aria-label="employmentStatus"
-            id="employmentStatus"
-            value={formData.employmentStatus}
-            onChange={(e) => setFormData({ ...formData, employmentStatus: e.target.value })}
-          >
-            <FormControlLabel value="employed" control={<Radio />} label="Employed" />
-            <FormControlLabel value="unemployed" control={<Radio />} label="Unemployed" />
-          </RadioGroup>
-        </FormControl>
-        <Divider sx={{ mt: 2, color: '#0E424C' }} ><Typography>Demographic Information</Typography></Divider>
-        <Box sx={{ mt: 2, gap: '5%' }} >
-          <Select
-            id="region"
-            placeholder="Select Region"
-            options={Districts.features
-              .map(d => d.properties.region)
-              .filter((value, index, self) => self.indexOf(value) === index)
-              .map(region => ({ label: region, value: region }))}
-            value={formData.region ? { label: formData.region, value: formData.region } : null}
-            onChange={option => handleSelectChange('region', option)}
-            sx={{ width: '100%', mt: 2, }}
+      <div>
+        <Box>
+          <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Basic Information</Typography></Divider>
+          <TextField
+            type='text'
+            id='firstname'
+            label="First name"
+            sx={{ width: '100%' }}
+            value={formData.firstname}
+            onChange={handleChange}
+            required
+          />
+          <TextField
+            type='text'
+            id='surname'
+            label="Surname"
+            sx={{ width: '100%', mt: 2 }}
+            value={formData.surname}
+            onChange={handleChange}
+            required
+          />
+          <TextField
+            type='text'
+            id='phoneNumber'
+            label="Phone Number"
+            sx={{ width: '100%', mt: 2 }}
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            required
+          />
+          <TextField
+            type='email'
+            id='email'
+            label='Email'
+            sx={{ width: '100%', mt: 2 }}
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+          <FormControl component="fieldset" sx={{ width: '100%', mt: 2 }}>
+            <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Gender</Typography></Divider>
+            <RadioGroup
+              row
+              aria-label="gender"
+              id="gender"
+              value={formData.gender}
+              onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+            >
+              <FormControlLabel value="Male" control={<Radio />} label="Male" />
+              <FormControlLabel value="Female" control={<Radio />} label="Female" />
+              {/* <FormControlLabel value="other" control={<Radio />} label="Other" /> */}
+            </RadioGroup>
+          </FormControl>
+          <TextField
+            type='number'
+            label='Age'
+            id='age'
+            variant="outlined"
+            fullWidth
+            required
+            InputProps={{ inputProps: { min: 18 } }}
+            sx={{ width: '100%', mt: 2 }}
+            value={formData.age}
+            onChange={handleChange}
           />
 
-          <Grid container spacing={4} >
+          <FormControl fullWidth sx={{ marginBottom: '16px', mt: 2 }}>
+            <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Marital Status</Typography></Divider>
+            <MUISelect
+              value={formData.maritalStatus}
+              onChange={(e) => setFormData({ ...formData, maritalStatus: e.target.value })}
+              id="maritalStatus"
+              displayEmpty
+            >
+              <MenuItem value="Single">Single</MenuItem>
+              <MenuItem value="Married">Married</MenuItem>
+            </MUISelect>
+          </FormControl>
 
-            <Grid item xs={6} sx={{ mt: 2 }}>
-              <Select
-                id="district"
-                placeholder="Select District"
-                options={districts}
-                value={formData.district ? { label: formData.district, value: formData.district } : null}
-                onChange={option => handleSelectChange('district', option)}
-                sx={{ width: '100%', mt: 2 }}
-              />
+          <FormControl fullWidth sx={{ marginBottom: '16px' }}>
+            <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Education Level</Typography></Divider>
+            <MUISelect
+              value={formData.educationLevel}
+              onChange={(e) => setFormData({ ...formData, educationLevel: e.target.value })}
+              id="educationLevel"
+              displayEmpty
+            >
+              <MenuItem value="Diploma">Diploma</MenuItem>
+              <MenuItem value="Bachelor">Bachelor</MenuItem>
+            </MUISelect>
+          </FormControl>
+
+          <div {...getRootProps()} style={{ border: '2px dashed #A0826A', padding: '20px', textAlign: 'center', marginTop: '16px' }}>
+            <input {...getInputProps()} />
+            {
+              isDragActive ?
+                <p>Drop the certificate here...</p> :
+                <p>Drag 'n' drop your certificate here, or click to select file</p>
+            }
+          </div>
+          {formData.certificate && (
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+              <Typography variant="body2" sx={{ mr: 2 }}>
+                Selected file: {formData.certificate.name}
+              </Typography>
+              <IconButton onClick={handleRemoveFile}>
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          )}
+
+          {uploadStatus && ( // Display upload status message
+            <Typography variant="body2" sx={{ mt: 2, color: 'green' }}>
+              {uploadStatus}
+            </Typography>
+          )}
+
+          <FormControl component="fieldset" sx={{ width: '100%', mt: 2 }}>
+            <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Employment Status</Typography></Divider>
+            <RadioGroup
+              row
+              aria-label="employmentStatus"
+              id="employmentStatus"
+              value={formData.employmentStatus}
+              onChange={(e) => setFormData({ ...formData, employmentStatus: e.target.value })}
+            >
+              <FormControlLabel value="employed" control={<Radio />} label="Employed" />
+              <FormControlLabel value="unemployed" control={<Radio />} label="Unemployed" />
+            </RadioGroup>
+          </FormControl>
+          <Divider sx={{ mt: 2, color: '#0E424C' }} ><Typography>Demographic Information</Typography></Divider>
+          <Box sx={{ mt: 2, gap: '5%' }} >
+            <Select
+              id="region"
+              placeholder="Select Region"
+              options={Districts.features
+                .map(d => d.properties.region)
+                .filter((value, index, self) => self.indexOf(value) === index)
+                .map(region => ({ label: region, value: region }))}
+              value={formData.region ? { label: formData.region, value: formData.region } : null}
+              onChange={option => handleSelectChange('region', option)}
+              sx={{ width: '100%', mt: 2, }}
+            />
+
+            <Grid container spacing={4} >
+
+              <Grid item xs={6} sx={{ mt: 2 }}>
+                <Select
+                  id="district"
+                  placeholder="Select District"
+                  options={districts}
+                  value={formData.district ? { label: formData.district, value: formData.district } : null}
+                  onChange={option => handleSelectChange('district', option)}
+                  sx={{ width: '100%', mt: 2 }}
+                />
+              </Grid>
+
+              <Grid item xs={6} sx={{ mt: 2 }}>
+                <Select
+                  id="ward"
+                  placeholder="Select Ward"
+                  options={wards}
+                  value={formData.ward ? { label: formData.ward, value: formData.ward } : null}
+                  onChange={option => handleSelectChange('ward', option)}
+                  sx={{ width: '100%', mt: 2 }}
+                />
+              </Grid>
             </Grid>
 
-            <Grid item xs={6} sx={{ mt: 2 }}>
-              <Select
-                id="ward"
-                placeholder="Select Ward"
-                options={wards}
-                value={formData.ward ? { label: formData.ward, value: formData.ward } : null}
-                onChange={option => handleSelectChange('ward', option)}
-                sx={{ width: '100%', mt: 2 }}
-              />
-            </Grid>
-          </Grid>
+          </Box>
 
-        </Box>
+          <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Subjects Capable of Teaching</Typography></Divider>
+          <Select
+            isMulti
+            id="subjects"
+            placeholder="Select Subjects"
+            required
+            options={[
+              { label: 'Advance Mathematics', value: 'Advance mathematics' },
+              { label: 'Basic Mathematics', value: 'basic mathematics' },
+              { label: 'English', value: 'english' },
+              { label: 'Physics', value: 'physics' },
+              { label: 'chemistry', value: 'chemistry' },
+              { label: 'Biology', value: 'biology' },
+              { label: 'Economics', value: 'economics' },
+              { label: 'Geography', value: 'geography' },
+              { label: 'Civics', value: 'civics' },
+              { label: 'General Studies', value: 'general studies' },
+              { label: 'History', value: 'history' },
+              { label: 'Islamic Knowledge', value: 'islamic knowledge' },
+              { label: 'Bible Knowledge', value: 'bible knowledge' },
+              { label: 'Divinity', value: 'divinity' },
+              // Add more subjects as needed
+            ]}
+            value={formData.subjects.map(subject => ({ label: subject, value: subject }))}
+            onChange={handleSubjectsChange}
+            sx={{ width: '100%', mt: 2 }}
+          />
 
-        <Divider sx={{ mt: 2, color: '#0E424C' }}><Typography>Subjects Capable of Teaching</Typography></Divider>
-        <Select
-          isMulti
-          id="subjects"
-          placeholder="Select Subjects"
-          options={[
-            { label: 'Advance Mathematics', value: 'Advance mathematics' },
-            { label: 'Basic Mathematics', value: 'basic mathematics' },
-            { label: 'English', value: 'english' },
-            { label: 'Physics', value: 'physics' },
-            { label: 'chemistry', value: 'chemistry' },
-            { label: 'Biology', value: 'biology' },
-            { label: 'Economics', value: 'economics' },
-            { label: 'Geography', value: 'geography' },
-            { label: 'Civics', value: 'civics' },
-            { label: 'General Studies', value: 'general studies' },
-            { label: 'History', value: 'history' },
-            { label: 'Islamic Knowledge', value: 'islamic knowledge' },
-            { label: 'Bible Knowledge', value: 'bible knowledge' },
-            { label: 'Divinity', value: 'divinity' },
-            // Add more subjects as needed
-          ]}
-          value={formData.subjects.map(subject => ({ label: subject, value: subject }))}
-          onChange={handleSubjectsChange}
-          sx={{ width: '100%', mt: 2 }}
-        />
-
-        <Input
-          type='password'
-          id='password'
-          placeholder="Password"
-          sx={{ width: '100%', mt: 2 }}
-          value={formData.password}
-          onChange={handleChange}
-        />
-        <Input
-          type='password'
-          placeholder="Confirm Password"
-          sx={{ width: '100%', mt: 2 }}
-          id='confirmPassword'
-          value={formData.confirmPassword}
-          onChange={handleChange}
-        />
-        <FormControlLabel
+          <TextField
+            type='password'
+            id='password'
+            label="Password"
+            sx={{ width: '100%', mt: 2 }}
+            value={formData.password}
+            onChange={handleChange}
+          
+          />
+          <TextField
+            type='password'
+            label="Confirm Password"
+            sx={{ width: '100%', mt: 2 }}
+            id='confirmPassword'
+            value={formData.confirmPassword}
+            onChange={handleChange}
+      
+          />
+        
+          <FormControlLabel
             control={
               <Checkbox
                 name="termsAccepted"
@@ -443,13 +455,13 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
             label="I accept the terms and conditions"
             sx={{ mt: 2 }}
           />
-        <Button variant='contained' sx={{ width: '100%', bgcolor: '#A0826A', mt: 2 }} onClick={handleSubmit}>
-          Register
-        </Button>
-      </Box>
-     
-    </div>
-    {/* <ToastContainer /> */}
+          <Button variant='contained' sx={{ width: '100%', bgcolor: '#A0826A', mt: 2 }} onClick={handleSubmit}>
+            Register
+          </Button>
+        </Box>
+
+      </div>
+      {/* <ToastContainer /> */}
     </React.Fragment>
   );
 };

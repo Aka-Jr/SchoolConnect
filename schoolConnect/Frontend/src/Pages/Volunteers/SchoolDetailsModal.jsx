@@ -17,6 +17,8 @@ import {
     Snackbar
 } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
+import { doc, getDoc } from 'firebase/firestore';
+import { db, auth } from '../../firebaseConfig'; // Update with your Firebase config
 
 const SchoolDetailsModal = ({ open, handleClose, schoolDetails, notificationType, requestDetails, handleAccept, handleReject }) => {
     const [confirmedAction, setConfirmedAction] = useState(null);
@@ -25,10 +27,32 @@ const SchoolDetailsModal = ({ open, handleClose, schoolDetails, notificationType
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [notificationMessage, setNotificationMessage] = useState('');
 
-    const handleAcceptClick = (requestId) => {
-        setConfirmedAction('accept');
-        setConfirmationOpen(true);
-        setConfirmationMessage(`Are you sure you want to accept this request? This action cannot be undone.`);
+    const handleAcceptClick = async (requestId) => {
+        try {
+            // Fetch current user's data to check availability status
+            const userDocRef = doc(db, 'users', auth.currentUser.uid);
+            const userDocSnapshot = await getDoc(userDocRef);
+            if (!userDocSnapshot.exists()) {
+                console.error('User document not found.');
+                return;
+            }
+            const currentUserData = userDocSnapshot.data();
+
+            // Check availability status
+            if (currentUserData.availabilityStatus !== 'available') {
+                setConfirmationOpen(false);
+                setNotificationMessage('You cannot accept this request as you are currently unavailable. Please finish your current commitment before accepting new requests.');
+                setSnackbarOpen(true);
+                return;
+            }
+
+            // Proceed with accepting the request
+            setConfirmedAction('accept');
+            setConfirmationOpen(true);
+            setConfirmationMessage(`Are you sure you want to accept this request? This action cannot be undone.`);
+        } catch (error) {
+            console.error('Error handling accept action:', error);
+        }
     };
 
     const handleRejectClick = (requestId) => {
@@ -170,7 +194,7 @@ const SchoolDetailsModal = ({ open, handleClose, schoolDetails, notificationType
                 </Dialog>
 
                 <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-                    <MuiAlert elevation={6} variant="filled" onClose={handleCloseSnackbar} severity="success">
+                    <MuiAlert elevation={6} variant="filled" onClose={handleCloseSnackbar} severity="error">
                         {notificationMessage}
                     </MuiAlert>
                 </Snackbar>

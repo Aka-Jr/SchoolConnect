@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Box, Table, TableHead, TableBody, TableCell, TableRow, IconButton, Typography, Tooltip } from '@mui/material';
+import { Modal, Box, Table, TableHead, TableBody, TableCell, TableRow, IconButton, Typography, Tooltip, ButtonGroup, Button } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BlockIcon from '@mui/icons-material/Block';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -10,13 +10,21 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const ListingsManager = ({ open, handleClose }) => {
     const [listings, setListings] = useState([]);
+    const [filteredStatus, setFilteredStatus] = useState('');
 
     useEffect(() => {
         const fetchListings = async () => {
             try {
                 const user = auth.currentUser;
                 const listingsCollection = collection(db, 'listings');
-                const q = query(listingsCollection, where('uid', '==', user.uid));
+                let q = query(listingsCollection, where('uid', '==', user.uid));
+
+                if (filteredStatus === 'unavailable') {
+                    q = query(listingsCollection, where('uid', '==', user.uid), whereIn('status', ['unavailable', 'ended']));
+                } else if (filteredStatus !== '') {
+                    q = query(listingsCollection, where('uid', '==', user.uid), where('status', '==', filteredStatus));
+                }
+
                 const snapshot = await getDocs(q);
                 const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 setListings(data);
@@ -28,7 +36,7 @@ const ListingsManager = ({ open, handleClose }) => {
         if (open) {
             fetchListings();
         }
-    }, [open]);
+    }, [open, filteredStatus]);
 
     const handleDeleteListing = async (id) => {
         try {
@@ -60,6 +68,10 @@ const ListingsManager = ({ open, handleClose }) => {
         }
     };
 
+    const clearFilter = () => {
+        setFilteredStatus('');
+    };
+
     return (
         <Modal open={open} onClose={handleClose}>
             <Box
@@ -68,7 +80,7 @@ const ListingsManager = ({ open, handleClose }) => {
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    bgcolor: '#0E424C',
+                    bgcolor: 'white', // White background
                     boxShadow: 24,
                     p: 4,
                     width: '80%',
@@ -78,35 +90,44 @@ const ListingsManager = ({ open, handleClose }) => {
                     overflowY: 'auto', // Enable vertical scrolling
                 }}
             >
-                <Typography variant="h5" gutterBottom sx={{ color: 'white' }}>Listings</Typography>
+                <Typography variant="h5" gutterBottom>Listings</Typography>
+                <ButtonGroup variant="contained" aria-label="outlined primary button group" sx={{ mb: 2 }}>
+                    <Button onClick={() => setFilteredStatus('ongoing')} variant={filteredStatus === 'ongoing' ? 'contained' : 'outlined'}>Ongoing</Button>
+                    <Button onClick={() => setFilteredStatus('unavailable')} variant={filteredStatus === 'unavailable' ? 'contained' : 'outlined'}>Unavailable</Button>
+                    <Button onClick={clearFilter} variant={filteredStatus === '' ? 'contained' : 'outlined'}>Clear Filter</Button>
+                </ButtonGroup>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell sx={{ color: 'white' }}>Description</TableCell>
-                            <TableCell sx={{ color: 'white' }}>Accommodation</TableCell>
-                            <TableCell sx={{ color: 'white' }}>Timestamp</TableCell>
-                            <TableCell sx={{ color: 'white' }}>Status</TableCell>
-                            <TableCell align="right" sx={{ color: 'white' }}>Actions</TableCell>
+                            <TableCell>Description</TableCell>
+                            <TableCell>Accommodation</TableCell>
+                            <TableCell>Timestamp</TableCell>
+                            <TableCell>Status</TableCell>
+                            <TableCell align="right">Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {listings.map((listing) => (
                             <TableRow key={listing.id}>
-                                <TableCell sx={{ color: 'white' }}>{listing.description}</TableCell>
-                                <TableCell sx={{ color: 'white' }}>{listing.willProvideAccommodation ? 'Yes' : 'No'}</TableCell>
-                                <TableCell sx={{ color: 'white' }}>{listing.timestamp && new Date(listing.timestamp.toDate()).toLocaleString()}</TableCell>
-                                <TableCell sx={{ color: 'white' }}>{listing.status}</TableCell>
+                                <TableCell>{listing.description}</TableCell>
+                                <TableCell>{listing.willProvideAccommodation ? 'Yes' : 'No'}</TableCell>
+                                <TableCell>{listing.timestamp && new Date(listing.timestamp.toDate()).toLocaleString()}</TableCell>
+                                <TableCell>{listing.status}</TableCell>
                                 <TableCell align="right">
                                     <Tooltip title="Delete">
                                         <IconButton onClick={() => handleDeleteListing(listing.id)} sx={{ color: 'red' }}><DeleteIcon /></IconButton>
                                     </Tooltip>
                                     {listing.status === 'ongoing' ? (
                                         <Tooltip title="Make Unavailable">
-                                            <IconButton onClick={() => handleUpdateStatus(listing.id, 'unavailable')} sx={{ color: 'white' }}><BlockIcon /></IconButton>
+                                            <IconButton onClick={() => handleUpdateStatus(listing.id, 'unavailable')} sx={{ color: 'black' }}><BlockIcon /></IconButton>
+                                        </Tooltip>
+                                    ) : listing.status === 'unavailable' || listing.status === 'ended' ? (
+                                        <Tooltip title="Make Ongoing">
+                                            <IconButton onClick={() => handleUpdateStatus(listing.id, 'ongoing')} sx={{ color: 'green' }}><CheckCircleIcon /></IconButton>
                                         </Tooltip>
                                     ) : (
-                                        <Tooltip title="Make Available">
-                                            <IconButton onClick={() => handleUpdateStatus(listing.id, 'ongoing')} sx={{ color: 'white' }}><CheckCircleIcon /></IconButton>
+                                        <Tooltip title="Ended">
+                                            <IconButton onClick={() => handleUpdateStatus(listing.id, 'ended')} sx={{ color: 'gray' }}><CheckCircleIcon /></IconButton>
                                         </Tooltip>
                                     )}
                                 </TableCell>

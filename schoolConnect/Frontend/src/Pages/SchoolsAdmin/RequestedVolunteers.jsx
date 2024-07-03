@@ -17,8 +17,9 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Snackbar,
 } from '@mui/material';
-import { Document, Page, PDFViewer, pdf } from '@react-pdf/renderer';
+import { Alert } from '@mui/material';
 
 const RequestedVolunteers = ({ open, handleClose, schoolId }) => {
   const [requests, setRequests] = useState([]);
@@ -27,9 +28,12 @@ const RequestedVolunteers = ({ open, handleClose, schoolId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   useEffect(() => {
     const fetchRequests = async () => {
+      setLoading(true);
       try {
         const q = query(collection(db, 'requests'), where('schoolId', '==', schoolId));
         const querySnapshot = await getDocs(q);
@@ -45,9 +49,11 @@ const RequestedVolunteers = ({ open, handleClose, schoolId }) => {
 
         setRequests(requestsData);
         setVolunteers(volunteersData);
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching requests:', error);
         setError('Failed to fetch requests.');
+        setLoading(false);
       }
     };
 
@@ -60,24 +66,27 @@ const RequestedVolunteers = ({ open, handleClose, schoolId }) => {
     setExpandedCertificate(expandedCertificate === volunteerId ? null : volunteerId);
   };
 
-  const downloadCertificate = async (certificateURL) => {
+  const downloadCertificate = (certificateURL) => {
     try {
       setLoading(true);
-      const blob = await pdf(certificateURL).toBlob();
-      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = certificateURL;
       a.download = 'certificate.pdf';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      setLoading(false);
     } catch (error) {
       console.error('Error downloading certificate:', error);
       setError('Failed to download certificate.');
-    } finally {
       setLoading(false);
+      setSnackbarMessage('Failed to download certificate.');
+      setSnackbarOpen(true);
     }
+  };
+
+  const closeSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   const getStatusColor = (status) => {
@@ -113,7 +122,7 @@ const RequestedVolunteers = ({ open, handleClose, schoolId }) => {
         <Typography variant="h6" component="h2" id="modal-modal-title">
           Requested Volunteers
         </Typography>
-        <FormControl  sx={{ mb: 2, left: '90%',white:'auto' }}>
+        <FormControl sx={{ mb: 2, left: '90%', white: 'auto' }}>
           <InputLabel id="status-filter-label">Filter by Status</InputLabel>
           <Select
             labelId="status-filter-label"
@@ -168,34 +177,13 @@ const RequestedVolunteers = ({ open, handleClose, schoolId }) => {
                   </TableCell>
                   <TableCell>
                     {volunteers[request.volunteerId]?.certificateURL && (
-                      <div>
-                        <Button
-                          variant="outlined"
-                          onClick={() => toggleCertificateView(request.volunteerId)}
-                        >
-                          {expandedCertificate === request.volunteerId ? 'Hide Certificate' : 'View Certificate'}
-                        </Button>
-                        {expandedCertificate === request.volunteerId && (
-                          <div style={{ marginTop: 10 }}>
-                            {loading ? (
-                              <CircularProgress />
-                            ) : (
-                              <PDFViewer width="100%" height="600px">
-                                <Document file={volunteers[request.volunteerId]?.certificateURL}>
-                                  <Page pageNumber={1} />
-                                </Document>
-                              </PDFViewer>
-                            )}
-                            <Button
-                              variant="outlined"
-                              onClick={() => downloadCertificate(volunteers[request.volunteerId]?.certificateURL)}
-                              style={{ marginTop: 10 }}
-                            >
-                              Download Certificate
-                            </Button>
-                          </div>
-                        )}
-                      </div>
+                      <Button
+                        variant="outlined"
+                        onClick={() => downloadCertificate(volunteers[request.volunteerId]?.certificateURL)}
+                        disabled={loading}
+                      >
+                        {loading ? 'Downloading...' : 'Download Certificate'}
+                      </Button>
                     )}
                   </TableCell>
                 </TableRow>
@@ -203,6 +191,11 @@ const RequestedVolunteers = ({ open, handleClose, schoolId }) => {
             </TableBody>
           </Table>
         </TableContainer>
+        <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={closeSnackbar}>
+          <Alert severity="error" onClose={closeSnackbar}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Box>
     </Modal>
   );
