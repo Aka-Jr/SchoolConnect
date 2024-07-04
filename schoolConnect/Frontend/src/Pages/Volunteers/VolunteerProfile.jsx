@@ -467,6 +467,9 @@ const VolunteerProfile = () => {
                   <Typography variant="body1">Field of Study: <span style={{ color: '#A0826A' }}>{userData.fieldOfStudy}</span></Typography>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
+                  <Typography variant="body1">Subjects Capable of Teaching: <span style={{ color: '#A0826A' }}>{userData.subjects.join(', ')}</span></Typography>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
                   <Typography variant="body1">Short about Me: <span style={{ color: '#A0826A' }}>{userData.aboutMe}</span></Typography>
                 </Grid>
               </>

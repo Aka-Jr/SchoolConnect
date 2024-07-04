@@ -83,11 +83,12 @@ const ListingsManager = ({ open, handleClose }) => {
                     bgcolor: 'white', // White background
                     boxShadow: 24,
                     p: 4,
-                    width: '80%',
+                    width: '90%',
                     maxHeight: '80%',
-                    borderRadius: 8,
+                    borderRadius: 2,
                     overflow: 'hidden',
                     overflowY: 'auto', // Enable vertical scrolling
+                    overflowX: 'auto',
                 }}
             >
                 <Typography variant="h5" gutterBottom>Listings</Typography>
@@ -101,7 +102,9 @@ const ListingsManager = ({ open, handleClose }) => {
                         <TableRow>
                             <TableCell>Description</TableCell>
                             <TableCell>Accommodation</TableCell>
-                            <TableCell>Timestamp</TableCell>
+                            <TableCell>Financial Assistance</TableCell>
+                            <TableCell>Date Posted</TableCell>
+                            <TableCell>deadline For Applying</TableCell>
                             <TableCell>Status</TableCell>
                             <TableCell align="right">Actions</TableCell>
                         </TableRow>
@@ -110,8 +113,10 @@ const ListingsManager = ({ open, handleClose }) => {
                         {listings.map((listing) => (
                             <TableRow key={listing.id}>
                                 <TableCell>{listing.description}</TableCell>
-                                <TableCell>{listing.willProvideAccommodation ? 'Yes' : 'No'}</TableCell>
+                                <TableCell>{listing.willProvideAccommodation ? 'Will be Provided by School' : 'Will not be Provided by School'}</TableCell>
+                                <TableCell>{listing.willProvideFinancialAssistance ? 'Will be Provided by School' : 'Will not be Provided by School'}</TableCell>
                                 <TableCell>{listing.timestamp && new Date(listing.timestamp.toDate()).toLocaleString()}</TableCell>
+                                <TableCell>{listing.deadlineForApplying && new Date(listing.deadlineForApplying.toDate()).toLocaleString()}</TableCell>
                                 <TableCell>{listing.status}</TableCell>
                                 <TableCell align="right">
                                     <Tooltip title="Delete">

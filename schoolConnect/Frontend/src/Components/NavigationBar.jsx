@@ -98,9 +98,9 @@ const NavigationBar = () => {
                                         <Tab key={index} label={page} component={Link} to={`/${page}`} sx={{ color: 'white' }} />
                                     ))}
                                 </Tabs>
-                                <IconButton sx={{ marginLeft: 'auto' }}>
+                                {/* <IconButton sx={{ marginLeft: 'auto' }}>
                                     <SearchIcon sx={{ color: 'white' }} />
-                                </IconButton>
+                                </IconButton> */}
                                 {isLoggedIn ? (
                                     <>
                                         <Button sx={{ color: 'white' }} onClick={handleDashboardRedirect}> Go to Dashboard</Button>

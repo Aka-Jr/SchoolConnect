@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Box, Typography, Button, TextField, FormControl } from '@mui/material';
-import Autocomplete from '@mui/material/Autocomplete';
+import { Modal, Container, Grid, Box, Typography, Button } from '@mui/material';
 import { collection, addDoc, Timestamp, doc as firestoreDoc, getDoc } from 'firebase/firestore';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { db, auth } from '../../firebaseConfig';
 
 const ApplicationModal = ({ open, handleClose, schoolUID, listingUID, schoolName }) => {
-    const [selectedSubjects, setSelectedSubjects] = useState([]);
     const [listingDescription, setListingDescription] = useState('');
+    const [listingSubjects, setListingSubjects] = useState([]);
+    const [listingQualifications, setListingQualifications] = useState([]);
     const [volunteerDetails, setVolunteerDetails] = useState(null);
 
     useEffect(() => {
@@ -41,6 +41,8 @@ const ApplicationModal = ({ open, handleClose, schoolUID, listingUID, schoolName
                 if (listingDocSnap.exists()) {
                     const listingData = listingDocSnap.data();
                     setListingDescription(listingData.description || '');
+                    setListingSubjects(listingData.subjects || []);
+                    setListingQualifications(listingData.qualifications || []);
                 } else {
                     console.error('Listing data not found');
                 }
@@ -55,24 +57,18 @@ const ApplicationModal = ({ open, handleClose, schoolUID, listingUID, schoolName
         }
     }, [open, listingUID]);
 
-    const handleSubjectsChange = (event, newValue) => {
-        setSelectedSubjects(newValue);
-    };
-
     const handleSubmit = async () => {
         try {
-            if (selectedSubjects.length === 0) {
-                toast.error('Please select at least one subject');
-                return;
-            }
-
-            // Check if any selected subject matches the listing description
-            const descriptionMatches = selectedSubjects.some(subject =>
-                listingDescription.toLowerCase().includes(subject.toLowerCase())
+            // Check if volunteer's subjects match any of the listing subjects
+            const subjectsMatch = volunteerDetails.subjects.some(subject =>
+                listingSubjects.includes(subject)
             );
 
-            if (!descriptionMatches) {
-                toast.warn('Please ensure that at least one selected subject matches the listing description.');
+            // Check if volunteer's education level matches any of the listing qualifications
+            const qualificationsMatch = listingQualifications.includes(volunteerDetails.educationLevel);
+
+            if (!subjectsMatch || !qualificationsMatch) {
+                toast.warn('Your subjects or qualifications do not match the requirements for this listing.');
                 return;
             }
 
@@ -83,7 +79,7 @@ const ApplicationModal = ({ open, handleClose, schoolUID, listingUID, schoolName
                 volunteerName: `${volunteerDetails.firstname} ${volunteerDetails.surname}`,
                 schoolName,
                 status: 'pending',
-                subjects: selectedSubjects,
+                subjects: volunteerDetails.subjects,
                 timestamp: Timestamp.now()
             };
 
@@ -100,6 +96,7 @@ const ApplicationModal = ({ open, handleClose, schoolUID, listingUID, schoolName
     };
 
     return (
+        <React.Fragment> 
         <Modal open={open} onClose={handleClose}>
             <Box sx={{
                 position: 'absolute',
@@ -116,48 +113,48 @@ const ApplicationModal = ({ open, handleClose, schoolUID, listingUID, schoolName
                 overflowY: 'auto',
             }}>
                 <Typography variant="h5" gutterBottom>Apply to Volunteer</Typography>
-                <Typography variant="body1" sx={{ marginBottom: 2 }}>Please carefully read the description below and ensure your selected subjects match those mentioned.</Typography>
+                <Typography variant="body1" sx={{ marginBottom: 2 }}>Please carefully read the description below and ensure your subjects and qualifications match those mentioned.</Typography>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Listing Description:</Typography>
                 <Typography variant="body1" sx={{ whiteSpace: 'pre-line', marginBottom: 2 }}>{listingDescription || 'No description available'}</Typography>
-                <FormControl fullWidth sx={{ marginBottom: 2 }}>
-                    <Autocomplete
-                        multiple
-                        options={[
-                            'Advance Mathematics',
-                            'Basic Mathematics',
-                            'English',
-                            'Physics',
-                            'Chemistry',
-                            'Biology',
-                            'Economics',
-                            'Geography',
-                            'Civics',
-                            'General Studies',
-                            'History',
-                            'Islamic Knowledge',
-                            'Bible Knowledge',
-                            'Divinity',
-                            'Kiswahili',
-                        ]}
-                        value={selectedSubjects}
-                        onChange={handleSubjectsChange}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                variant="outlined"
-                                label="Select Subjects"
-                                placeholder="Subjects"
-                            />
-                        )}
-                        sx={{ marginBottom: 2 }}
-                    />
-                </FormControl>
+                <Container>
+            <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+                <Grid item xs={12} md={6}>
+                    <Box>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Listing Subjects:</Typography>
+                        <Typography variant="body1" sx={{ whiteSpace: 'pre-line', marginBottom: 2 }}>{listingSubjects.join(', ') || 'No subjects specified'}</Typography>
+                    </Box>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <Box>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Listing Qualifications:</Typography>
+                        <Typography variant="body1" sx={{ whiteSpace: 'pre-line', marginBottom: 2 }}>{listingQualifications.join(', ') || 'No qualifications specified'}</Typography>
+                    </Box>
+                </Grid>
+            </Grid>
+            {volunteerDetails && (
+                <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                        <Box>
+                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Your Subjects:</Typography>
+                            <Typography variant="body1" sx={{ whiteSpace: 'pre-line', marginBottom: 2 }}>{volunteerDetails.subjects.join(', ') || 'No subjects specified'}</Typography>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <Box>
+                            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Your Qualification:</Typography>
+                            <Typography variant="body1" sx={{ whiteSpace: 'pre-line', marginBottom: 2 }}>{volunteerDetails.educationLevel || 'No qualification specified'}</Typography>
+                        </Box>
+                    </Grid>
+                </Grid>
+            )}
+        </Container>
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <Button variant="contained" onClick={handleSubmit}>Submit Application</Button>
                 </Box>
-                <ToastContainer />
+               
             </Box>
         </Modal>
+        <ToastContainer /></React.Fragment>
     );
 };
 

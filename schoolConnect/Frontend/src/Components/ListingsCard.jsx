@@ -124,14 +124,16 @@ const ListingsCard = ({ listings }) => {
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: '1rem', width: '100%', marginBottom: '1rem' }}>
                 <TextField
-                    label='Search by Region'
+                    label='Search Opportunities by Location'
                     value={searchRegion}
+                     placeholder='eg. name of district, region, ward or street'
                     onChange={(e) => setSearchRegion(e.target.value)}
                     sx={{ width: '40%' }}
                 />
                 <TextField
-                    label='Search by School Name'
+                    label='Search Opportunities by School Name'
                     value={searchSchoolName}
+                    placeholder='eg. Mbande Secondary School'
                     onChange={(e) => setsearchSchoolName(e.target.value)}
                     sx={{ width: '40%' }}
                 />
@@ -145,7 +147,7 @@ const ListingsCard = ({ listings }) => {
                                 alt='school logo'
                                 height='140'
                                 image={schoolDetails[listing.uid]?.profileImageUrl || ''}
-                                sx={{ height: '100px', width: '100px', borderRadius: '50%', bgcolor: deepPurple[500] }}
+                                sx={{ height: '100px', width: '100px', borderRadius: '50%', bgcolor: 'white'}}
                             />
                         </Box>
                         <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -156,7 +158,7 @@ const ListingsCard = ({ listings }) => {
                                 <Typography gutterBottom variant='h5' sx={{ color: '#A0826A' }}>
                                     Description:
                                 </Typography>
-                                <Typography variant='body2' sx={{ color: 'white', height: '50px', marginBottom: '5%', marginTop: '5%' }}>
+                                <Typography variant='body2' sx={{ color: 'white', height: '30%', marginBottom: '5%', marginTop: '5%', textAlign: 'justify' }}>
                                     {listing.description}
                                 </Typography>
                             </Box>
@@ -169,9 +171,9 @@ const ListingsCard = ({ listings }) => {
                                 </Box>
                                 <Box sx={{ display: 'flex', color: 'white', fontSize: 'small', alignItems: 'center', marginTop: 1 }}>
                                     <EventIcon sx={{ marginRight: 1 }} />
-                                    {listing.deadline && (
+                                    {listing.deadlineForApplying && (
                                         <Typography variant='subtitle' sx={{ textAlign: 'center' }}>
-                                        <span style={{color: '#A0826A', fontSize: 'medium', fontWeight: 'bold' }}>Deadline:</span> {format(listing.deadline.toDate(), 'MMMM d, yyyy h:mm a')}
+                                        <span style={{color: '#A0826A', fontSize: 'medium', fontWeight: 'bold' }}>Deadline:</span> {format(listing.deadlineForApplying.toDate(), 'MMMM d, yyyy h:mm a')}
                                         </Typography>
                                     )}
                                 </Box>

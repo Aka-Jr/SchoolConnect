@@ -166,28 +166,28 @@ const VolunteerCardsModal = ({ volunteers, schoolDetails }) => {
             <Typography variant='h4' sx={{ color: '#004D40', marginBottom: '1rem' }}>Available Volunteers</Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: '1rem', width: '100%', marginBottom: '1rem' }}>
                 <TextField
-                    label='Search by Region'
+                    label='Search Volunteer by Region'
                     value={searchRegion}
                     placeholder='eg. Dar es Salaam'
                     onChange={(e) => setSearchRegion(e.target.value)}
                     sx={{ width: '40%' }}
                 />
                 <TextField
-                    label='Search by Education Level'
+                    label='Search Volunteer(s) by Education Level'
                     value={searchEducationLevel}
                     placeholder='eg. bachelor'
                     onChange={(e) => setSearchEducationLevel(e.target.value)}
                     sx={{ width: '40%' }}
                 />
                 <TextField
-                    label='Search by Subjects'
+                    label='Search Volunteer(s) by Subjects'
                     value={searchSubjects}
                     placeholder='eg. chemistry, physics'
                     onChange={(e) => setSearchSubjects(e.target.value)}
                     sx={{ width: '40%' }}
                 />
                 <TextField
-                    label='Search by Gender'
+                    label='Search Volunteer(s) by Gender'
                     value={searchGender}
                     placeholder='eg. male'
                     onChange={(e) => setSearchGender(e.target.value)}

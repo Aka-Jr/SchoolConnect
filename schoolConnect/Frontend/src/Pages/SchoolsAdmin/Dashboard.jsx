@@ -105,7 +105,7 @@ const Dashboard = () => {
                     </Grid>
                     <Grid item xs={2}>
                         <Card sx={{ bgcolor: '#0E424C', textAlign: 'center' }}>
-                            <Typography sx={{ color: 'white' }}>View Posted Opportunities</Typography>
+                            <Typography sx={{ color: 'white' }}>Posted Opportunities</Typography>
                             <CardContent>
                                 <IconButton sx={{ color: 'white' }}>
                                     <ViewListIcon  onClick={() => {

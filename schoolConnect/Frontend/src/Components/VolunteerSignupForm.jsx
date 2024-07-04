@@ -124,6 +124,10 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
       validationErrors.termsAccepted = 'You must accept the terms and conditions.';
     }
 
+    if (!subjects || subjects.length === 0) {
+      validationErrors.subjects = 'Please select at least one subject that you are capable of teaching.';
+    }
+
     if (!region) {
       validationErrors.region = 'Please select region.';
     }
@@ -135,6 +139,8 @@ const VolunteerSignupForm = ({ handleSwitchForm }) => {
     if (!ward) {
       validationErrors.ward = 'Please select ward.';
     }
+
+
 
 
     Object.keys(validationErrors).forEach((key) => {
