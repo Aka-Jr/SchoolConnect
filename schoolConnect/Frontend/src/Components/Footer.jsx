@@ -15,7 +15,7 @@ const Footer = () => {
                     School<span style={{ color: '#A0826A' }}>Connect</span> &copy; {date.getFullYear()}
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, gap: 3, flexWrap: 'wrap' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <EmailIcon sx={{ verticalAlign: 'middle', mr: 1, fontSize: 20 }} />
                         <Typography variant="body2">shulekonnect@gmail.com</Typography>
                     </Box>
@@ -26,7 +26,7 @@ const Footer = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <PhoneIcon sx={{ verticalAlign: 'middle', mr: 1, fontSize: 20 }} />
                         <Typography variant="body2">+255 752 656 069</Typography>
-                    </Box>
+                    </Box> */}
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <GooglePlayIcon sx={{ verticalAlign: 'middle', mr: 1, fontSize: 20 }} />
                         <Link href="https://drive.google.com/drive/folders/1kdBesPMxii01-ayL4X700AgIpVY7tEGh?usp=sharing" target="_blank" rel="noopener" sx={{ color: 'inherit', display: 'flex', alignItems: 'center' }}>

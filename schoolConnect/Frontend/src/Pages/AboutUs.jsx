@@ -54,8 +54,8 @@ const AboutUs = () => {
                 <Typography variant="h5" gutterBottom>
                   Our Vision
                 </Typography>
-                <Typography variant="body1">
-                  Insert your vision statement here. This could be a brief description of what your organization aims to achieve.
+                <Typography variant="body1" sx={{textAlign: 'justify'}}>
+                Our vision is to create a world where every school has the support it needs to provide quality education and where every volunteer finds meaningful opportunities to contribute their skills and passions. By leveraging technology and community engagement, we aspire to build a global network of support for educational institutions, enhancing the learning experience for students everywhere.
                 </Typography>
               </Paper>
             </Grid>
@@ -64,8 +64,8 @@ const AboutUs = () => {
                 <Typography variant="h5" gutterBottom>
                   Our Mission
                 </Typography>
-                <Typography variant="body1">
-                  Insert your mission statement here. Describe the purpose and goals of your organization, focusing on how you plan to achieve your vision.
+                <Typography variant="body1" sx={{textAlign: 'justify'}}>
+                Our mission at SchoolConnect is to seamlessly bridge the gap between passionate volunteers and schools in need, fostering a collaborative environment where education can thrive. We aim to simplify the process of matching volunteers with schools, ensuring that every student has access to the support and resources they need for a brighter future.
                 </Typography>
               </Paper>
             </Grid>

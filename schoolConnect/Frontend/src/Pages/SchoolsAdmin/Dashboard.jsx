@@ -87,7 +87,7 @@ const Dashboard = () => {
                 <Grid container spacing={2} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
                     <Grid item xs={2}>
                         <Card sx={{ bgcolor: '#0E424C', textAlign: 'center' }}>
-                            <Typography sx={{ color: 'white' }}>Add Listing</Typography>
+                            <Typography sx={{ color: 'white' }}>Post Opportunity</Typography>
                             <CardContent>
                                 <IconButton sx={{ color: 'white' }}>
                                     <RedeemIcon />
@@ -105,10 +105,13 @@ const Dashboard = () => {
                     </Grid>
                     <Grid item xs={2}>
                         <Card sx={{ bgcolor: '#0E424C', textAlign: 'center' }}>
-                            <Typography sx={{ color: 'white' }}>View Listings</Typography>
+                            <Typography sx={{ color: 'white' }}>View Posted Opportunities</Typography>
                             <CardContent>
                                 <IconButton sx={{ color: 'white' }}>
-                                    <ViewListIcon />
+                                    <ViewListIcon  onClick={() => {
+                                        fetchListings();
+                                        handleOpenViewListModal();
+                                    }}/>
                                 </IconButton>
                             </CardContent>
                             <CardActions sx={{ justifyContent: 'center' }}>
